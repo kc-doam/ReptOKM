@@ -30,14 +30,24 @@
 	$ git config --global filter.win1251.smudge "iconv -f utf-8 -t windows-1251"
 	$ git config --global filter.win1251.required true
 	```
+4. Проект, редактируемый стандартными средствами Windows, имеет символы возврата 
+каретки, но они удаляются из файлов в кодировке `UTF-8` вместе с BOM. Для 
+последующего добавления символа возврата каретки используйте команду `git cr`
+	``` bash
+	$ git config --global alias.cr\
+	 '!find . -type f \( -name "*.md" -o -name "*.xml" \) -print0\
+	 | xargs -0 grep -m1 -l `printf "^\xEF\xBB\xBF"`\
+	 | xargs sed -i "1 s/^\xEF\xBB\xBF//; s/\$/\x0D/"\
+	 && git ls-files -mo --eol'
+	```
 
-4. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
+5. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
 слиянии. Информация о существующей ветке не потеряется.
 	``` bash
 	$ git config --global merge.ff false
 	```
 
-5. Теперь можно работать с файлами через Git Bash или Git Client не заботясь 
+6. Теперь можно работать с файлами через Git Bash или Git Client не заботясь 
 о кодировке.
 
-##
+#
