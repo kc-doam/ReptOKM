@@ -63,7 +63,7 @@ Public Sub SettingsBankID(ByRef BankID As Collection, Optional ByRef BankSUPP _
       sub_bank = Right(.Name, Len(.Name) - Len(bank) - 1)
       ' Если появляется Банк ...
       If Len(bank) = 2 Then
-        'If FindSheet("STAT_") > 0 Then ' «Костыль»
+        'If GetSheetID("STAT_") > 0 Then ' «Костыль»
         '  If bank = "OT" Then sub_bank = "OE"
         'End If
         ' ... смотрим, является ли Банк новым И Ссылка не битая
@@ -73,7 +73,7 @@ Public Sub SettingsBankID(ByRef BankID As Collection, Optional ByRef BankSUPP _
           Bank_HeaderRow.Add .RefersToRange.Row, "STAT_" & bank
           ' ЛУЧШЕ проверять по Worksheets.CodeName (read-only),
           ' если структура Книги создаётся с нуля
-          Bank_SheetID.Add FindSheet(.Value), "STAT_" & bank
+          Bank_SheetID.Add GetSheetID(.Value), "STAT_" & bank
           ' Вписываем новый Банк и имя листа, на котором он находится
           Bank_Key.Add "_" & bank, "STAT_" & bank
           ' Активируем лист, на котором расположен Банк
@@ -81,7 +81,7 @@ Public Sub SettingsBankID(ByRef BankID As Collection, Optional ByRef BankSUPP _
             Worksheets(Bank_SheetID("STAT_" & bank)).Select
         End If
       End If
-      If FindSheet("STAT_") > 0 Then ' «Костыль»
+      If GetSheetID("STAT_") > 0 Then ' «Костыль»
         Select Case sub_bank
           Case "Quant_inbox": sub_bank = "AMT_source"
           Case "Quant_new": sub_bank = "AimAMT"
@@ -109,7 +109,7 @@ Public Sub SettingsBankID(ByRef BankID As Collection, Optional ByRef BankSUPP _
         BankSUPP.Add .RefersToRange.column, sub_bank
         ' ... и Номер строки заголовка реквизитов «HEAD»
         If sub_bank = "NameS" Then
-          BankSUPP.Add FindSheet(.Value), "sheet"
+          BankSUPP.Add GetSheetID(.Value), "sheet"
           BankSUPP.Add .RefersToRange.Row, "head"
         End If
       End If
@@ -197,7 +197,7 @@ Property Get GetMainPath(Optional ByVal DiskOnly As Boolean) As String
   Next s: GetMainPath = Join(strSym, "")
 End Property
 
-Public Sub Record_Log(ByVal LogDir As String, ByVal AccessMode As String)
+Public Sub RecLog(ByVal LogDir As String, ByVal AccessMode As String)
   Attribute SettingsBankID.VB_Description = "r302 Запись в журнал об открытии отчёта"
   Dim Name As String
   

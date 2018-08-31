@@ -101,18 +101,18 @@ Public Function ClearSpacesInText(ByVal text As String) As String
   ClearSpacesInText = Trim(text)
 End Function
 
-Function FindSheet(ByVal FindSheetCodeName As String, Optional ByRef ThisBook _
+Function GetSheetID(ByVal SheetCodeName As String, Optional ByRef ThisBook _
   As Boolean = False) As Byte ' ThisBook - ДА, эта книга
-  Attribute SettingsBankID.VB_Description = "r300 Найти индекс листа по CodeName"
+  Attribute SettingsBankID.VB_Description = "r303 Найти индекс листа по CodeName"
   Dim GetBook As Workbook, GetSheet As Worksheet
   
   Set GetBook = IIf(ThisBook, ThisWorkbook, ActiveWorkbook)
-  If InStr(FindSheetCodeName, "!") > 0 Then _
-    FindSheetCodeName = Replace(Mid(FindSheetCodeName, 2, InStr( _
-      FindSheetCodeName, "!") - 2), "'", "") ' Имя листа должно быть БЕЗ "!"
+  If InStr(SheetCodeName, "!") > 0 Then _
+    SheetCodeName = Replace(Mid(SheetCodeName, 2, InStr( _
+      SheetCodeName, "!") - 2), "'", "") ' Имя листа должно быть БЕЗ "!"
   For Each GetSheet In GetBook.Worksheets
-    If InStr(1, GetSheet.CodeName, FindSheetCodeName, vbTextCompare) _
-    Or InStr(1, GetSheet.Name, FindSheetCodeName, vbTextCompare) Then _
-      FindSheet = GetSheet.Index: Exit For
+    If InStr(1, GetSheet.CodeName, SheetCodeName, vbTextCompare) _
+    Or InStr(1, GetSheet.Name, SheetCodeName, vbTextCompare) Then _
+      GetSheetID = GetSheet.Index: Exit For
   Next GetSheet: Set GetSheet = Nothing: Set GetBook = Nothing
 End Function

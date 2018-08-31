@@ -51,7 +51,7 @@ Private Sub GetWorkbooks(ByVal strDir As String, Optional ByVal QuestStat _
     If (GetAttr(strName) And vbDirectory) = vbDirectory Then
       With ThisWorkbook
         If DirName.Count = 0 And Right(.Name, 2) = "sm" Then _
-          Record_Log GetMainPath & "#Finansist\YCHET\Архив\", _
+          RecLog GetMainPath & "#Finansist\YCHET\Архив\", _
             IIf(.ReadOnly, "Чтение", "Запись")
       End With
       ' Возвращаем в strName первый найденный файл по маске *.xl*

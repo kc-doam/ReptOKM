@@ -1,7 +1,7 @@
 # To view the line-endings in files you can use the command 'git ls-files --eol'
 # It can be specified: 'w/crlf', 'w/lf', 'w/mixed'
-# Auto detect text files and perform CRLF normalization
-* text	eol=crlf
+# Auto detect text files
+* text=auto
 
 # Custom for Visual Basic (CRLF for classes or modules)
 *.bas	filter=win1251

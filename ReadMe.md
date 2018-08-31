@@ -1,4 +1,4 @@
-## Известные проблемы при работе с репозиторием
+﻿## Известные проблемы при работе с репозиторием
 
 ### Проблемы чтения кодировки windows-1251 в репозитории
 
@@ -14,23 +14,26 @@
 [репозитории]://github.com/bopoh13/ReptOKM/tree/master/src
 [скачивания в ZIP]://github.com/bopoh13/ReptOKM/archive/master.zip
 
-### Автоматическая кодировка файлов через фильтр Git
+### Настройка кодировки файлов в Windows через фильтр Git
 
-1. В корне (клона) репозитория необходимо создать файл `.gitattributes`.
-2. Добавить в файл макросы и комментарий
+1. В корне (клона) репозитория необходимо создать файл `.gitattributes` и указать 
+в нём файлы
 	``` markdown
 	# Custom for Visual Basic (CRLF for classes or modules)
 	*.bas	filter=win1251  eol=crlf
 	*.cls	filter=win1251  eol=crlf
 	```
 
-3. Выполнить в Git Bash комманды
+2. Задать фильтр для файлов и отключить замену окончаний строк
 	``` bash
 	$ git config --global filter.win1251.clean "iconv -f windows-1251 -t utf-8"
 	$ git config --global filter.win1251.smudge "iconv -f utf-8 -t windows-1251"
 	$ git config --global filter.win1251.required true
+	# Не изменять окончания строк в репозитории
+	$ git config core.autocrlf false
+	$ git config core.eol crlf
 	```
-4. Проект, редактируемый стандартными средствами Windows, имеет символы возврата 
+3. Проект, редактируемый стандартными средствами Windows, имеет символы возврата 
 каретки, но они удаляются из файлов в кодировке `UTF-8` вместе с BOM. Для 
 последующего добавления символа возврата каретки используйте команду `git cr`
 	``` bash
@@ -41,13 +44,13 @@
 	 && git ls-files -mo --eol'
 	```
 
-5. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
+4. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
 слиянии. Информация о существующей ветке не потеряется.
 	``` bash
 	$ git config --global merge.ff false
 	```
 
-6. Теперь можно работать с файлами через Git Bash или Git Client не заботясь 
+5. Теперь можно работать с файлами через Git Bash или Git Client не заботясь 
 о кодировке.
 
-#
+# 
