@@ -1,4 +1,4 @@
-﻿## Известные проблемы при работе с репозиторием
+## Известные проблемы при работе с репозиторием
 
 ### Проблемы чтения кодировки windows-1251 в репозитории
 
@@ -16,41 +16,24 @@
 
 ### Настройка кодировки файлов в Windows через фильтр Git
 
-1. В корне (клона) репозитория необходимо создать файл `.gitattributes` и указать 
-в нём файлы
-	``` markdown
-	# Custom for Visual Basic (CRLF for classes or modules)
-	*.bas	filter=win1251  eol=crlf
-	*.cls	filter=win1251  eol=crlf
-	```
-
-2. Задать фильтр для файлов и отключить замену окончаний строк
+1. Нужно сохранить [клиентский хук] в директорию `<REPO>\.git\hooks` без расширения `.sh`  
+Хук будет выполняться перед сохранием изменений (commit).
+2. Для Windows необходимо задать автоматическую замену переноса строк
 	``` bash
-	$ git config --global filter.win1251.clean "iconv -f windows-1251 -t utf-8"
-	$ git config --global filter.win1251.smudge "iconv -f utf-8 -t windows-1251"
-	$ git config --global filter.win1251.required true
 	# Не изменять окончания строк в репозитории
-	$ git config core.autocrlf false
+	$ git config core.autocrlf true
 	$ git config core.eol crlf
 	```
-3. Проект, редактируемый стандартными средствами Windows, имеет символы возврата 
-каретки, но они удаляются из файлов в кодировке `UTF-8` вместе с BOM. Для 
-последующего добавления символа возврата каретки используйте команду `git cr`
-	``` bash
-	$ git config --global alias.cr\
-	 '!find . -type f \( -name "*.md" -o -name "*.xml" \) -print0\
-	 | xargs -0 grep -m1 -l `printf "^\xEF\xBB\xBF"`\
-	 | xargs sed -i "1 s/^\xEF\xBB\xBF//; s/\$/\x0D/"\
-	 && git ls-files -mo --eol'
-	```
-
-4. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
+3. Установить флаг `--no-ff`, чтобы Git всегда создавал новый объект Commit при 
 слиянии. Информация о существующей ветке не потеряется.
 	``` bash
 	$ git config --global merge.ff false
 	```
 
-5. Теперь можно работать с файлами через Git Bash или Git Client не заботясь 
-о кодировке.
+4. Используйте редактор, который при сохранении файлов оставляет только единственный 
+символ переноса строк `CRLF`. Теперь можно работать с файлами через Git Bash 
+или Git Client не заботясь о кодировке.
+
+[клиентский хук]://gist.github.com/c55f1538454755fdff71fba0d686e371
 
 # 

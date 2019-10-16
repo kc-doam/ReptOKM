@@ -4,8 +4,8 @@
 * text=auto
 
 # Custom for Visual Basic (CRLF for classes or modules)
-*.bas	filter=win1251
-*.cls	filter=win1251
+*.bas	eol=crlf
+*.cls	eol=crlf
 
 # And others formats
 .accd*	binary
