@@ -2,7 +2,8 @@ Attribute VB_Name = "Main"
 Option Explicit
 Option Base 1
 '12345678901234567890123456789012345bopoh13@ya67890123456789012345678901234567890
-Public Const CRC_HOST As Integer = 127, REV As Integer = &H123
+Public Const CRC_HOST As Integer = 127, REV As Integer = &H137
+Public Const PERSON_LIST = "Ф/Л,Ю/Л" ' Не менять! "*/Л,Ф/Л,Ю/Л"
 
 ' Коллекции: ключи коллекции xID, рабочие листы и колонки
 Private xID As New Collection
@@ -14,11 +15,11 @@ Private Const QT As String = ": Количество "
 Private Table() As Variant
 
 Static Sub Main_Sub(ByVal DateBegin As Date, ByVal DateEnd As Variant)
-  Attribute GetBanks.Main_Sub = "r310 Сбор данных"
-  Dim tBegin As Double, i As Integer, k As Byte
-
+  Attribute Main_Sub.VB_Description = "r310 ¦ Сбор данных"
+  Dim tBegin As Double, eZ As Byte, nZ As Integer
+  
   With Application
-    .ReferenceStyle = xlA1 ' (прямые ссылки)
+    .ReferenceStyle = xlA1 ' Абсолютные ссылки
     .ScreenUpdating = False: .EnableEvents = False
     .Calculation = xlCalculationManual
   End With: tBegin = Timer

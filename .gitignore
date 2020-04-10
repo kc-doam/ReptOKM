@@ -1,6 +1,9 @@
 #############
 ## Windows detritus
 #############
+schema/
+*.vbs
+*.xls*
 
 # Windows image file caches
 Thumbs.db
@@ -9,5 +12,12 @@ ehthumbs.db
 # Folder config file
 [Dd]esktop.ini
 
+# Excel Backup File
+*.xar
+*.xlk
+
 # Recycle Bin used on file shares
+~$*.doc*
+~$*.xls*
 $RECYCLE.BIN/
+*.tmp
