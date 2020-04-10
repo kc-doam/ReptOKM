@@ -23,16 +23,13 @@ Public Enum WordFormType
   wtAsMaterial = 13
 End Enum
 
-Public Const ZERO As String = " ноль"
-
-Private Digits() As String, WordForm As New Collection
+Private Gaps() As String, WordForm As New Collection
 
 Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
   Optional ByVal InWords As Boolean = False) As String '> Число в слово
-  Attribute NumberFormatterRU.VB_Description = "r312 ¦ Выбрать количество существительного из списка"
+  Attribute NumberFormatterRU.VB_Description = "r312 ¦ Количество существительного (из списка)"
   '' "Один", "Два", "Шесть" Именительный падеж (есть что?)
   '' "Одного", "Двух", "Шести" Родительный падеж (нет чего?)
-  '' МУЖСКОЙ и МУЖСКОЙ род (не отработаны)
   Dim Digits_test() As String, Teen As Boolean
   Dim colCount As WordFormType, aU As Variant, eZ As Byte
   
@@ -62,15 +59,15 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
   colCount = (Len(CStr(Number)) + 2) \ 3 - 1 ' Число разрядов если InWords
   If Not (InWords Xor colCount = 0) Then colCount = Item ' Warn!
   ' Разбить число на разряды по 3 цифры
-  Digits = Split(Format(Number, IIf(InWords, "0,00", "0")), Chr(160))
+  Gaps = Split(Format(Number, IIf(InWords, "0,00", "0")), Chr(160))
   
   ' Item < UnitTyte.Min Xor Item >= WordForm.Count + UnitTyte.Min
   If Item < wtAsTonne Xor Item >= WordForm.Count + wtAsTonne Then ' HotFix!
     Debug.Print "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Item
     NumberFormatterRU = Number
   Else
-    For Each aU In Digits
-      Teen = (aU Mod 100) >= 11 And (aU Mod 100) < 20
+    For Each aU In Gaps
+      Teen = (aU Mod 100) >= 11 And (aU Mod 100) < 20 ' Им.падеж, Мн.число
       
       Select Case -(Not Teen) * aU Mod 10 ' Warn!
         Case Is = 1: aU = 1 ' "One"
@@ -78,100 +75,77 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
         Case Else: aU = 3 ' "Many"
       End Select
       
-      If colCount > wtAsNone And colCount < wtInQuadrills Then ' HotFix!
-        If Digits(eZ) Like "000*" Then
-          Digits(eZ) = Empty
-        Else
-          Digits(eZ) = aU
-        End If
-        
-        If colCount > wtInThousands Then _
-          colCount = colCount - 1 Else colCount = Item
+      If InWords Then
+        Gaps(eZ) = NumeralRU(CInt(Gaps(eZ)), colCount, CByte(aU)) _
+          & WordForm(CStr(colCount))(aU)
+        eZ = eZ + 1: If colCount > wtInThousands Then _
+          colCount = colCount - 1 Else colCount = Item ' HotFix!
       Else
-        If Digits(eZ) Like "000*" Then
-          If aU = "" Then ' " -" ZERO
-            Digits(eZ) = IIf(UBound(Digits) > 0, "", ZERO) _
-              & WordForm(CStr(colCount))(3)
-          End If
-        Else
-          Digits(eZ) = aU
-        End If
-      End If: eZ = eZ + 1
+        Gaps(eZ) = Gaps(eZ) & WordForm(CStr(Item))(aU)
+      End If
     Next aU
     
-    NumberFormatterRU = LTrim(Join(Digits, ""))
-  End If: Erase Digits
+    NumberFormatterRU = LTrim(Join(Gaps, ""))
+  End If: Erase Gaps
 End Function
 
 Function NumeralRU(ByRef Digit As Integer, ByRef Item As WordFormType, _
   state As Byte) As String
   Attribute NumeralRU.VB_Description = "r312 ¦ Число прописью"
-  Dim numeral As Variant, prefix As String, postfix As String
+  Dim numeral As Variant, ending As Variant, secondDigit As Byte
   
-  numeral = [{"", " один", " два", " три", " четыр", " пят", " шест", " сем", " восем", " девят"}]
+  ending = [{"а", "", "е", "ь", "и"}]
+  numeral = [{"", " один", " дв", " три", " четыр", " пят", " шест", " сем", " восем", " девят"}]
+  numeral(1) = Item < wtInMills And Not Item = wtAsNone ' True = Женский род
   
-  If Not (Digit Mod 10) = 0 Then
-    ' Существительное: Мужской род
-    If (Item > wtInThousands Or Item = wtAsNone) Then
-      Select Case state
-        Case Is = 3
-          postfix = "ь"
+  If Digit > 0 Then ' Если больше нуля
+    If state = 1 Then
+      If numeral(1) Then numeral(2) = " одна" ' Женский род
+    ElseIf state = 2 Then
+      Select Case (Digit Mod 10) ' Две последних цифры
+        Case Is = 2 ' Мужской род
+          If Not numeral(1) Then state = 0 ' state - 2
+        Case Is = 3: state = 1 ' state - 1
       End Select
-      If (Digit Mod 10) = 4 Then postfix = "е"
-    Else ' Существительное: Женский род
-      numeral(2) = " одна": numeral(3) = " две"
-      Select Case state
-        Case Is = 3
-          postfix = "ь"
+    ElseIf state = 3 Then
+      Select Case (Digit Mod 100) ' Две последних цифры
+        Case Is < 10: state = 3 ' state ' HotFix!
+        Case Is = 12: state = 2 ' state - 1
+        Case Is < 20: state = 1 ' state - 2
       End Select
-      If (Digit Mod 10) = 4 Then postfix = "е"
-    End If
-  End If
-  
-  If Digit > 0 Then ' Если число больше нуля
-    NumeralRU = numeral(Digit Mod 10 + 1) & postfix ' Единицы
+    End If: secondDigit = (Digit Mod 100) \ 10: If (Digit Mod 10) > 0 Then _
+      NumeralRU = numeral(Digit Mod 10 + 1) & ending(state + 1) ' Разряд #1
     
-    If (Digit - (Digit \ 100) * 100) >= 10 _
-    And (Digit - (Digit \ 100) * 100) <= 19 Then ' -Teen
-      numeral(3) = " две"
-      Select Case (Digit Mod 10)
-        Case Is = 0
-          NumeralRU = " десять"
-        Case Else
-          NumeralRU = numeral(Digit Mod 10 + 1) & "надцать"
-      End Select
-    End If
-    
-    If Len(CStr(Digit)) > 1 Then
-      NumeralRU = prefix & NumeralRU
-      
-      If (Digit \ 10) < 10 Or (Digit Mod 10) = 0 Then ' Десятки
-        Select Case (Digit \ 10)
+    Select Case (Digit Mod 100) ' Две последних цифры
+      Case Is > 19
+        Select Case secondDigit ' Разряд #2
           Case Is < 4
-            prefix = numeral((Digit Mod 100) \ 10 + 1) & "дцать"
+            NumeralRU = numeral(secondDigit + 1) _
+              & IIf(secondDigit = 2, ending(1), "") & "дцать" & NumeralRU
           Case Is = 4
-            prefix = " сорок"
+            NumeralRU = " сорок" & NumeralRU
           Case Else
-            prefix = numeral((Digit Mod 100) \ 10 + 1) & "ьдесят"
+            NumeralRU = numeral(secondDigit + 1) & "ьдесят" & NumeralRU
         End Select
-      End If
-      
-      If Len(CStr(Digit)) > 2 Then
-        Select Case (Digit \ 100) ' Сотни
-          Case Is = 1
-            NumeralRU = " стo" & NumeralRU
-          Case Is = 2
-            NumeralRU = " двести" & NumeralRU
-          Case 3
-            NumeralRU = numeral(Digit \ 100 + 1) & "ста" & NumeralRU
-          Case 4
-            NumeralRU = numeral(Digit \ 100 + 1) & postfix & "ста" & NumeralRU
-          Case Else
-            NumeralRU = numeral(Digit \ 100 + 1) & postfix & "сот" & NumeralRU
-        End Select
-      End If
-    End If
+      Case Is > 10
+        NumeralRU = NumeralRU & "надцать"
+      Case Is = 10
+        NumeralRU = " десять"
+    End Select
     
-    NumeralRU = NumeralRU & WordForm(CStr(Item))(state)
+    If Digit > 99 Then ' Сотни
+      Select Case (Digit \ 100) ' Разряд #3
+        Case Is = 1
+          NumeralRU = " стo" & NumeralRU
+        Case 2 To 4
+          NumeralRU = numeral(Digit \ 100 + 1) _
+            & IIf(Digit \ 100 = 3, "", ending(3)) & "ст" _
+            & IIf(Digit \ 100 = 2, ending(5), ending(1)) & NumeralRU
+        Case Else
+          NumeralRU = numeral(Digit \ 100 + 1) & "ьсот" & NumeralRU
+      End Select
+    End If
+  ElseIf Item < wtInThousands Or Item > wtInQuadrills Then
+    If UBound(Gaps) = 0 Then NumeralRU = " ноль"
   End If
 End Function
