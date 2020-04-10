@@ -70,15 +70,13 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
     NumberFormatterRU = Number
   Else
     For Each aU In Digits
-      Teen = (aU Mod 100 >= 11 And aU Mod 100 < 20)
+      Teen = (aU Mod 100) >= 11 And (aU Mod 100) < 20
       
       Select Case -(Not Teen) * aU Mod 10 ' Warn!
         Case Is = 1: aU = 1 ' "One"
         Case 2 To 4: aU = 2 ' "Few"
         Case Else: aU = 3 ' "Many"
       End Select
-      
-      aU = NumeralRU(CInt(Digits(eZ)), colCount, CByte(aU))
       
       If colCount > wtAsNone And colCount < wtInQuadrills Then ' HotFix!
         If Digits(eZ) Like "000*" Then
@@ -107,64 +105,70 @@ End Function
 
 Function NumeralRU(ByRef Digit As Integer, ByRef Item As WordFormType, _
   state As Byte) As String
-  Attribute NumeralRU.VB_Description = "r312 ¦ "
+  Attribute NumeralRU.VB_Description = "r312 ¦ Число прописью"
   Dim numeral As Variant, prefix As String, postfix As String
   
   numeral = [{"", " один", " два", " три", " четыр", " пят", " шест", " сем", " восем", " девят"}]
-  
-  If (Digit \ 10) > 0 Then
-    If (Digit \ 10) < 10 Or (Digit Mod 10) = 0 Then
-      Select Case (Digit \ 10)
-        Case Is < 4
-          prefix = numeral((Digit Mod 100) \ 10 + 1) & "дцать"
-        Case Is = 4
-          prefix = " сорок"
-        Case Else
-          prefix = numeral((Digit Mod 100) \ 10 + 1) & "ьдесят"
-      End Select
-    End If
-  End If
-  
-  If Digit >= 10 And Digit <= 19 Then ' -Teen
-    numeral(3) = " две" '': If Digit > 14 Then postfix = "ь"
-    
-    If Digit = 10 Then
-      NumeralRU = " десять" & WordForm(CStr(Item))(state)
-    Else
-      NumeralRU = numeral(Digit Mod 10 + 1) & postfix & "надцать" _
-        & WordForm(CStr(Item))(state)
-    End If
-    
-    Exit Function
-  End If
   
   If Not (Digit Mod 10) = 0 Then
     ' Существительное: Мужской род
     If (Item > wtInThousands Or Item = wtAsNone) Then
       Select Case state
-        Case Is = 2
-          If (Digit Mod 10) = 4 Then postfix = "е"
         Case Is = 3
           postfix = "ь"
       End Select
+      If (Digit Mod 10) = 4 Then postfix = "е"
     Else ' Существительное: Женский род
       numeral(2) = " одна": numeral(3) = " две"
       Select Case state
-        Case Is = 2
-          If (Digit Mod 10) = 4 Then postfix = "е"
         Case Is = 3
           postfix = "ь"
       End Select
+      If (Digit Mod 10) = 4 Then postfix = "е"
     End If
   End If
   
   If Digit > 0 Then ' Если число больше нуля
     NumeralRU = numeral(Digit Mod 10 + 1) & postfix ' Единицы
     
-    If Len(Digit) > 1 Then
+    If (Digit - (Digit \ 100) * 100) >= 10 _
+    And (Digit - (Digit \ 100) * 100) <= 19 Then ' -Teen
+      numeral(3) = " две"
+      Select Case (Digit Mod 10)
+        Case Is = 0
+          NumeralRU = " десять"
+        Case Else
+          NumeralRU = numeral(Digit Mod 10 + 1) & "надцать"
+      End Select
+    End If
+    
+    If Len(CStr(Digit)) > 1 Then
       NumeralRU = prefix & NumeralRU
-      If Len(Digit) > 2 Then
-        NumeralRU = numeral(Digit \ 100 + 1) & "сот" & NumeralRU
+      
+      If (Digit \ 10) < 10 Or (Digit Mod 10) = 0 Then ' Десятки
+        Select Case (Digit \ 10)
+          Case Is < 4
+            prefix = numeral((Digit Mod 100) \ 10 + 1) & "дцать"
+          Case Is = 4
+            prefix = " сорок"
+          Case Else
+            prefix = numeral((Digit Mod 100) \ 10 + 1) & "ьдесят"
+        End Select
+      End If
+      
+      If Len(CStr(Digit)) > 2 Then
+        Select Case (Digit \ 100) ' Сотни
+          Case Is = 1
+            NumeralRU = " стo" & NumeralRU
+          Case Is = 2
+            NumeralRU = " двести" & NumeralRU
+          Case 3
+            NumeralRU = numeral(Digit \ 100 + 1) & "ста" & NumeralRU
+          Case 4
+            NumeralRU = numeral(Digit \ 100 + 1) & postfix & "ста" & NumeralRU
+          Case Else
+            NumeralRU = numeral(Digit \ 100 + 1) & postfix & "сот" & NumeralRU
+        End Select
       End If
     End If
     
