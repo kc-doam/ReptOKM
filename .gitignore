@@ -2,8 +2,9 @@
 ## Windows detritus
 #############
 schema/
+*.do[ct][mx]
+*.xl[ast][bmx]
 *.vbs
-*.xls*
 
 # Windows image file caches
 Thumbs.db
@@ -13,6 +14,8 @@ ehthumbs.db
 [Dd]esktop.ini
 
 # Excel Backup File
+*.bak
+*.log
 *.xar
 *.xlk
 

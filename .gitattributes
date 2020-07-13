@@ -5,9 +5,14 @@
 
 # Custom for Visual Basic (CRLF for classes or modules)
 # NOTE: 'wte' attribute in Git 2.18+ allows to store a file in different from UTF-8 encoding
+*.log	working-tree-encoding=CP1251	eol=CRLF
+*.md	eol=CRLF
+*.txt	eol=CRLF
+
 *.bas	working-tree-encoding=CP1251	eol=CRLF
 *.cls	working-tree-encoding=CP1251	eol=CRLF
-*.txt	working-tree-encoding=CP1251	eol=CRLF
+*.rel	eol=CRLF
+*.xml	eol=CRLF
 
 # And others formats
-.accd*	binary
+*.accd[bt]	binary

@@ -46,15 +46,16 @@ Public Sub Shell_Sort(ByRef Items As Variant, ByVal GetColumn As Byte)
   End If
 End Sub
 
-Function GetQuarterNumber(ByVal SetDate As Date, Optional ByVal GetYear _
+Function GetQuarterNumber(ByVal GetDate As Date, Optional ByVal GetYear _
   As Boolean = False) As String ' Номер квартала
-  Attribute GetQuarterNumber.VB_Description = "r310 ¦ Заменить цифру на номер квартала"
-  GetQuarterNumber = (Month(SetDate) - 1) \ 3 + 1
+  Attribute GetQuarterNumber.VB_Description = "r313 ¦ Заменить цифру на номер квартала"
+  Attribute GetQuarterNumber.VB_ProcData.VB_Invoke_Func = " \n2"
+  GetQuarterNumber = (Month(GetDate) - 1) \ 3 + 1
   Select Case CByte(GetQuarterNumber)
     Case 1 To 3: GetQuarterNumber = String(GetQuarterNumber, "I") & " квартал "
-    Case 4: GetQuarterNumber = "IV квартал "
+    Case Is = 4: GetQuarterNumber = "IV квартал "
   End Select
-  If GetYear Then GetQuarterNumber = GetQuarterNumber & Year(SetDate) & " г."
+  If GetYear Then GetQuarterNumber = GetQuarterNumber & Year(GetDate) & " г."
 End Function
 
 Function Trip(ByVal Text As String) As String
@@ -68,17 +69,17 @@ Function Trip(ByVal Text As String) As String
 End Function
 
 Function Tripp(ByVal Item_notRange As Variant) As Variant
-  Attribute Tripp.VB_Description = "r311 ¦ Функция удаления разрывов строк по краям"
-  Const CRL0 As String = "[" & vbCrLf & " ]*", LF0 As String = "[" & vbLf & " ]*"
-  Const CRL8 As String = "*[" & vbCrLf & " ]", LF8 As String = "*[" & vbLf & " ]"
+  Attribute Tripp.VB_Description = "r313 ¦ Функция удаления разрывов строк по краям"
+  Const NL0 As String = "[" & vbCrLf & " ]*", LF0 As String = "[" & vbLf & " ]*"
+  Const NL8 As String = "*[" & vbCrLf & " ]", LF8 As String = "*[" & vbLf & " ]"
   Dim str As String, eZ As Byte, kZ As Integer
   
   For kZ = LBound(Item_notRange, 2) To UBound(Item_notRange, 2)
     For eZ = LBound(Item_notRange, 1) To UBound(Item_notRange, 1)
       str = Trim(Replace(Item_notRange(eZ, kZ), Chr(160), " ")) ' Неразрывный пробел
-      While str Like CRL0 Or str Like LF0 Or str Like CRL8 Or str Like LF8
-        If str Like CRL0 Or str Like LF0 Then str = Trim(Right(str, Len(str) - 1))
-        If str Like CRL8 Or str Like LF8 Then str = Trim(Left(str, Len(str) - 1))
+      While str Like NL0 Or str Like LF0 Or str Like NL8 Or str Like LF8
+        If str Like NL0 Or str Like LF0 Then str = Trim(Right(str, Len(str) - 1))
+        If str Like NL8 Or str Like LF8 Then str = Trim(Left(str, Len(str) - 1))
       Wend: Item_notRange(eZ, kZ) = str
   Next eZ, kZ: Tripp = Item_notRange
 End Function
@@ -109,7 +110,7 @@ Function ClearSpacesInText(ByVal Text As String) As String
   ''text = Replace(text, Chr(151), Chr(45))  ' Длинное тире
   ''text = Replace(text, Chr(133), "...")    ' Многоточие
   ''text = Replace(text, Chr(172), "")       ' знак переноса
-  Do While text Like "*  *" ' Выполнять ПОКА есть двойной пробел
+  Do While Text Like "*  *" ' Выполнять ПОКА есть двойной пробел
     Text = Replace(Text, "  ", " ")
   Loop
   ''text = Replace(text, Chr(39), Chr(34))   ' апостроф

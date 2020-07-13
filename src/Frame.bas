@@ -4,7 +4,6 @@ Option Base 1
 Option Private Module
 '12345678901234567890123456789012345bopoh13@ya67890123456789012345678901234567890
 
-Private objDialogBox As DialogSheet
 ' Коллекция с именами папок статистик
 Public DirName As New Collection
 ' Коллекция файлов статистик менеджеров (индекс совпадает с DirName)
@@ -13,11 +12,13 @@ Public FileName As New Collection
 Public Manager As New Collection
 
 Private Enum DialogType
-  dtRange = 0
-  dtMonth = 1
-  dtQuarter = 2
-  dtHalfYear = 3
+  dtDateRange = 0
+  dtDateMonth = 1
+  dtDateQuarter = 2
+  dtDateHalfYear = 3
 End Enum
+
+Private objDialogBox As DialogSheet
 
 Function GetUserName(Optional ByVal SetUserDomain = False) As String
   Attribute GetUserName.VB_Description = "r311 ¦ Получить имя текущей учётной записи"
@@ -26,16 +27,21 @@ Function GetUserName(Optional ByVal SetUserDomain = False) As String
 End Function
 
 Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
-  Attribute Auto_Open.VB_Description = "r310 ¦ Автозапуск"
+  Attribute Auto_Open.VB_Description = "r313 ¦ Автозапуск"
   Dim max As Integer, modulo As Integer, item As Variant, Paths() As Variant
   Const HOST As String = "#Finansist\YCHET\"
   
+  With ActiveWindow
+    .DisplayHorizontalScrollBar = True
+    .DisplayVerticalScrollBar = True
+    .DisplayWorkbookTabs = True
+  End With
   ' Очищаем коллекции с именами папок и с именами файлов
   Set DirName = Nothing: Set FileName = Nothing: Set Manager = Nothing
   ' Массив каталогов ВСЕХ существующих Банков (+ косая черта в конце строки)
-  Paths = Array(HOST, HOST & "ИБ Юридическая пресса\", _
-    HOST & "Авторы-бренды\", HOST & "Интернет-статьи\", HOST & "Азбука права\", _
-    HOST & "Рецензирование ИБ Финансист\", HOST & "Вопросы под заказ\Базы\")
+  Paths = Array(HOST, HOST & "Авторы-бренды\", HOST & "Рецензирование ИБ " _
+    & "Финансист\", HOST & "ИБ Юридическая пресса\", HOST & "Азбука права\", _
+    HOST & "Интернет-статьи\", HOST & "Вопросы под заказ\Базы\")
   
   ' Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
   If CRC_HOST > 2 ^ UBound(Paths) Then _
@@ -62,11 +68,11 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
         & FileName(modulo) & """", vbCritical: item = vbNo: Exit Sub
     Next item: Paths(1) = Paths(1) & FileName(modulo) & vbCr
   Next modulo: If max = 0 Then Paths = Array(True, Date, Empty, Paths(4))
-  If FileName.Count > 0 Then GetForm_DialogElements dtRange, Paths
+  If FileName.Count > 0 Then GetForm_DialogElements dtDateRange, Paths
   '-> NEXT
   
   If Not Paths(LBound(Paths)) Then ActiveWorkbook.Saved = True Else _
-    If Not IsEmpty(Paths(2)) Then Main_Sub Paths(2), Paths(3)
+    If Not IsEmpty(Paths(2)) Then Main_Sub Paths(3), Paths(2)
 End Sub
 
 Static Sub DialogButtons_Click()
@@ -79,15 +85,15 @@ Static Sub DialogButtons_Click()
       Case 1
         For Each item In FileName: str = str & vbCr & item: Next item: MsgBox _
           "Список файлов для формирования отчёта: " & vbCr & str, vbInformation
-      Case 3: .Visible = xlSheetVisible ' isChanged = -1
+      Case 3: .Visible = xlSheetVisible ' IsChanged = -1
     End Select
   End With
 End Sub
 
 Private Sub GetForm_DialogElements(ByVal DType As DialogType, _
   ByRef Lbls As Variant)
-  Attribute GetForm_DialogElements.VB_Description = "r310 ¦ Создание диалогового окна"
-  Const PIXEL As Single = 4.8 ' Lbls: 1= Files, 2= Dirs, 3= Text, 4= Title
+  Attribute GetForm_DialogElements.VB_Description = "r313 ¦ Создание диалогового окна"
+  Const PIXEL As Single = 5.25 ' Lbls: 1= Files, 2= Dirs, 3= Text, 4= Title
   
   Application.DisplayAlerts = False
   
@@ -95,16 +101,21 @@ Private Sub GetForm_DialogElements(ByVal DType As DialogType, _
       DialogSheets(1).Delete
     Wend: Set objDialogBox = DialogSheets.Add
     With objDialogBox
-      With .DialogFrame ' Диалоговое окно
-        .Width = 240: .Height = 134.4 + PIXEL * 8
-        .Caption = Application.Name & " - r" & REV & Lbls(UBound(Lbls))
+      With .DialogFrame.ShapeRange ' Диалоговое окно
+        .Width = PIXEL * 50: .Height = PIXEL * 35
+        .Parent.Caption = Application.Name & " - r" & REV & Lbls(UBound(Lbls))
       End With ': .Buttons(1).Delete
       With .Buttons(1)
-        .Top = PIXEL * (8 + 12): .DismissButton = False ' Отклонить
-        .Caption = "Список": .OnAction = "DialogButtons_Click"
-      End With: .Buttons(2).text = "Нет"
+        If FileName.Count = 0 Then .Enabled = False
+        .Left = PIXEL * 50: .Top = PIXEL * 20: .Text = "Список"
+        .Width = PIXEL * 10: .Height = PIXEL * 3
+        .OnAction = "DialogButtons_Click": .DismissButton = False ' Отклонить
+      End With: With .Buttons(2)
+        .Left = PIXEL * 50: .Top = PIXEL * 12: .Text = "Нет"
+        .Width = PIXEL * 10: .Height = PIXEL * 3
+      End With
 
-      ' Элементы диалогового окна: Left[P*15], Top, Widht[P*35], Heigth[P*3]
+      ' Граница объектов: Left[P=>13], Top[P=>6], Width[P=<50], Heigth[P=<35]
       With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
         .text = "Введите начало периода: "
       End With
@@ -117,10 +128,10 @@ Private Sub GetForm_DialogElements(ByVal DType As DialogType, _
             Year(Date)), 4, 1), "/", ".") ' Апрель
         End If
       End With
-      With .Labels.Add(PIXEL * 15, PIXEL * 8 + 20, PIXEL * 20, PIXEL * 3)
+      With .Labels.Add(PIXEL * 15, PIXEL * 12, PIXEL * 20, PIXEL * 3)
         .text = "Введите конец периода: "
       End With
-      With .EditBoxes.Add(PIXEL * 38, PIXEL * 8 + 20, PIXEL * 10, PIXEL * 3)
+      With .EditBoxes.Add(PIXEL * 38, PIXEL * 12, PIXEL * 10, PIXEL * 3)
         .Name = "DateEnd"
         If Month(Date) > 3 And Month(Date) < 10 Then
           .text = Replace(DateSerial(Year(Date), 3 + 1, 0), "/", ".") ' Март
@@ -129,11 +140,12 @@ Private Sub GetForm_DialogElements(ByVal DType As DialogType, _
             Year(Date)), 9 + 1, 0), "/", ".") ' Сентябрь
         End If
       End With
-      With .Labels.Add(PIXEL * 15, PIXEL * 8 + 40, PIXEL * 35, PIXEL * 22)
+      With .Labels.Add(PIXEL * 15, PIXEL * 16, PIXEL * 35, PIXEL * 21)
         Lbls(2) = ClearSpacesInText(Lbls(2))
         .text = Lbls(3) & String(2, vbLf) & Replace(Lbls(2), "#Finansist\", "> ")
       End With
-      With .Buttons.Add(PIXEL * 52, PIXEL * 8, PIXEL * 10, PIXEL * 3) ' Btn "Да"
+      With .Buttons.Add(PIXEL * 50, PIXEL * 8, PIXEL * 10, PIXEL * 3) ' Btn "Да"
+        If FileName.Count = 0 Then .Enabled = False
         .DismissButton = True ' Отклонить = .Hide
         .text = "Да": .OnAction = "DialogButtons_Click"
       End With
@@ -192,14 +204,41 @@ Private Sub GetWorkbooks(ByVal PathName As String) ' Все статистики
     If Err.Number = 5 Or Err.Number = 53 Or Err.Number >= 75 Then End
 End Sub
 
+Function Taxpayer_Number_CRC(ByVal ITN12orTIN10 As Double) As Boolean
+  Attribute INNCRC.VB_Description = "r313 ¦ Проверка контрольной суммы ИНН"
+  Attribute INNCRC.VB_ProcData.VB_Invoke_Func = " \n9"
+  Dim CodeLen(11) As Byte, eZ As Byte, mZ As Integer, nZ As Integer
+  
+  CodeLen(1) = 3
+  CodeLen(2) = 7
+  CodeLen(3) = 2
+  CodeLen(4) = 4
+  CodeLen(5) = 10
+  CodeLen(6) = 3
+  CodeLen(7) = 5
+  CodeLen(8) = 9
+  CodeLen(9) = 4
+  CodeLen(10) = 6
+  CodeLen(11) = 8
+  
+  eZ = Len(ITN12orTIN10) ' По длине определяем: Физ или Юр лицо
+  If eZ - 1 > 12 Then Exit Function ' False, если больше 12 цифр
+  
+  For mZ = eZ - 1 To 1 Step -1
+    ' Добавлен CByte()
+    nZ = nZ + CByte(Mid(ITN12orTIN10, mZ, 1)) * CodeLen(12 - eZ + mZ)
+  Next mZ: mZ = (nZ \ 11) * 11
+  If Right(ITN12orTIN10, 1) = Right(nZ - mZ, 1) Then INNCRC = True
+  If eZ = 12 Then If Not INNCRC(Left(ITN12orTIN10), eZ - 1 ) Then INNCRC = False
+End Function
 
 Function ChoiceCategory(ByVal CurrentRow As Integer) As Byte
-  Attribute ChoiceCategory.VB_Description = "r311 ¦ Матрица"
+  Attribute ChoiceCategory.VB_Description = "r313 ¦ Матрица"
   Dim Category(16) As String, eZ As Byte
   
   Category(1) = "МИНФИН" ' 1
   Category(2) = "ФНС" ' 2
-  Category(3) = "СЧ[Е,Ё]ТНАЯ ПАЛАТА*"
+  Category(3) = "СЧ[ЁЕ]ТНАЯ ПАЛАТА*"
   Category(4) = "МИНИСТЕРСТВО ТРУДА*"
   Category(5) = "РОСТРУД"
   Category(6) = "*ИНСПЕКЦИЯ ТРУДА*"
