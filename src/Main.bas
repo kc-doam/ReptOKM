@@ -1,9 +1,9 @@
 Attribute VB_Name = "Main"
 Option Explicit
 Option Base 1
-'12345678901234567890123456789012345bopoh13@ya67890123456789012345678901234567890
+'123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
-Public Const CRC_HOST As Integer = 127, REV As Integer = &H139
+Public Const WORKBOOKS_FILTER$ = "*", CRC_HOST% = 256, REV% = &H13A
 Public Const PERSON_LIST = "Ф/Л,Ю/Л" ' Не менять! "*/Л,Ф/Л,Ю/Л"
 
 ' Коллекции: ключи коллекции xID, рабочие листы и колонки
@@ -15,8 +15,8 @@ Private Const QT As String = ": Количество "
 ' Динамический массив для сбора данных
 Private Table() As Variant
 
-Static Sub Main_Sub(ByVal BeginDate As Date, ByVal EndDate As Variant)
-  Attribute Main_Sub.VB_Description = "r310 ¦ Сбор данных"
+Static Sub Main_Sub(ByVal dateBegin As Date, ByVal dateEnd As Variant)
+  Attribute Main_Sub.VB_Description = "r314 ¦ Сбор данных"
   Dim tBegin As Double, eZ As Byte, nZ As Integer
   
   With Application
@@ -33,9 +33,9 @@ Static Sub Main_Sub(ByVal BeginDate As Date, ByVal EndDate As Variant)
     "Ни один Банк не найден!": Application.Cursor = xlDefault: End ' HotFix!
   
   Debug.Print GetRecord(0, "sheet", 1)
-  Debug.Print DateSerial(IIf(Month(DateAdd("m", -6, EndDate)) < 12, _
-    Year(DateAdd("m", -6, EndDate)), Year(DateAdd("m", -6, EndDate)) + 1), _
-    IIf(Month(EndDate) - 5 < 1, 12, 0) + Month(EndDate) - 5, 0) ' Для заголовка
+  Debug.Print DateSerial(IIf(Month(DateAdd("m", -6, dateEnd)) < 12, _
+    Year(DateAdd("m", -6, dateEnd)), Year(DateAdd("m", -6, dateEnd)) + 1), _
+    IIf(Month(dateEnd) - 5 < 1, 12, 0) + Month(dateEnd) - 5, 0) ' Для заголовка
   Stop
   
   With Application

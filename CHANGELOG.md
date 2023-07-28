@@ -1,3 +1,25 @@
+### [2023.07.8-beta]
+ > * Rename *objects*
+ > * Fix *Enum* `DialogType` **переработано**
+ > * Fix *sub* `Shell_Sort` **переработано**
+ > * Fix *sub* `GetForm_DialogElements` **переработано**
+ > * Fix *sub* `Main_Sub` **переработано**
+ > * Fix *sub* `GetBanks` **переработано** && Rename *variable* ~`AMT_source`~ to `AMT_seed`
+ > * Fix *function* `GetQuarterNumber` **переработано**
+ > * Fix *function* `FileUnlocked` **переработано**
+ > * Fix *function* `NumberFormatterRU` **переработано**
+ > * Fix *function* `NumeralRU` **переработано**
+ > * Fix *function* `RemoveEndings` **переработано**
+ > * Fix *function* `FindRegions` **переработано**
+ > * Fix *function* `GetSupplerRec` **переработано** && Rename *variable* ~`IsSelectSupp_Forced`~ to `isForce_SearchSupp`
+ > * Fix *function* `GetRecord` **переработано** && Rename *variable* ~`BankIndex`~ to `bankKeyIndex`
+ > * Fix *function* `GetSheetID` **переработано**
+ > * Fix *function* `DeleteModulesAndCode` **переработано**
+ - Add *const* `WORKBOOKS_FILTER` **выбор определённых имён файлов, разделитель `$`**
+ * Fix *function* `Taxpayer_Number_CRC` **исправлена ошибка**
+
+[2023.07.8-beta]: ../../commit/45fb4c25
+
 ### [2020.07.7-alpha]
  > * Fix *sub* `NumeralRU` **исправлена ошибка подсчёта `secondDigit`**
  > * Fix *function* `GetSupplerRec` **исправлена ошибка**
@@ -13,7 +35,7 @@
  - Add *function* `FindRegions` **Стеммер: поиск 'региона r2'**
  - Add *function* `isVowel` **гласная буква**
 
-[2020.06.7-alpha]: ../../compare/14650a0b...master-git-2.18
+[2020.06.7-alpha]: ../../compare/14650a0b...master
 
 ### [2020.04.6-alpha] \[num-formatter\]
  - Add *object* `WordForm` as *collection* **список существительных в категории чисел**

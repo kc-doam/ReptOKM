@@ -1,7 +1,7 @@
 Attribute VB_Name = "Literate"
 Option Explicit
 Option Base 1
-'12345678901234567890123456789012345bopoh13@ya67890123456789012345678901234567890
+'123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
 Public Enum WordFormType
   wtAsTonne = -4
@@ -26,13 +26,13 @@ End Enum
 
 Private Gaps() As String, WordForm As New Collection
 
-Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
-  Optional ByVal InWords As Boolean = False) As String '> Число в слово
-  Attribute NumberFormatterRU.VB_Description = "r313 ¦ Количество существительного (из списка)"
+Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As WordFormType, _
+  Optional ByVal isNumberText As Boolean = False) As String '> Число в слово
+  Attribute NumberFormatterRU.VB_Description = "r314 ¦ Количество существительного (из списка)"
   Attribute NumberFormatterRU.VB_ProcData.VB_Invoke_Func = " \n7"
   '' "Один", "Два", "Шесть" Именительный падеж (есть что?)
   '' "Одного", "Двух", "Шести" Родительный падеж (нет чего?)
-  Dim colCount As WordFormType, Teen As Boolean, aU As Variant, eZ As Byte
+  Dim colCount As WordFormType, teenage As Boolean, aU As Variant, eZ As Byte
   
   If WordForm.Count = 0 Then
     WordForm.Add [{" тонна", " тонны", " тонн"}], CStr(wtAsTonne)
@@ -40,7 +40,7 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
     WordForm.Add [{" минута", " минуты", " минут"}], CStr(wtAsMinute) ' Time
     WordForm.Add [{" секунда", " секунды", " секунд"}], CStr(wtAsSecond) ' Time
     WordForm.Add [{"", "", ""}], CStr(wtAsNone) ' HotFix!
-    '         "One", "Few", "Many"; Для дробных «Number» нужно применять "Few"
+    '         "One", "Few", "Many"; Для дробных «number» нужно применять "Few"
     WordForm.Add [{" тысяча", " тысячи", " тысяч"}], CStr(wtInThousands)
     WordForm.Add [{" миллион", " миллиона", " миллионов"}], CStr(wtInMills)
     WordForm.Add [{" миллиард", " миллиарда", " миллиардов"}], CStr(wtInBills)
@@ -57,32 +57,32 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
     WordForm.Add [{" Материал", " Материала", " Материалов"}], CStr(wtAsMaterial)
   End If
   
-  colCount = (Len(CStr(Number)) + 2) \ 3 - 1 ' Число разрядов если InWords
-  If Not (InWords Xor colCount = 0) Then colCount = Item ' Warn!
+  colCount = (Len(CStr(number)) + 2) \ 3 - 1 ' Число разрядов если isNumberText
+  If Not (isNumberText Xor colCount = 0) Then colCount = Ref_Item ' Warn!
   ' Разбить число на разряды по 3 цифры
-  Gaps = Split(Format(Number, IIf(InWords, "0,00", "0")), Chr(160))
+  Gaps = Split(Format(number, IIf(isNumberText, "0,00", "0")), Chr(160))
   
   ' Item < UnitTyte.MinIndex Xor Item >= WordForm.Count + UnitTyte.MinIndex
-  If Item < wtAsTonne Xor Item >= WordForm.Count + wtAsTonne Then ' HotFix!
-    Debug.Print "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Item
-    NumberFormatterRU = Number
+  If Ref_Item < wtAsTonne Xor Ref_Item >= WordForm.Count + wtAsTonne Then ' HotFix!
+    Debug.Print "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Ref_Item
+    NumberFormatterRU = number
   Else
     For Each aU In Gaps
-      Teen = (aU Mod 100) >= 11 And (aU Mod 100) < 20 ' Им.падеж, Мн.число
+      teenage = (aU Mod 100) >= 11 And (aU Mod 100) < 20 ' Им.падеж, Мн.число
       
-      Select Case -(Not Teen) * aU Mod 10 ' Warn!
+      Select Case -(Not teenage) * aU Mod 10 ' Warn!
         Case Is = 1: aU = 1 ' "One"
         Case 2 To 4: aU = 2 ' "Few"
         Case Else: aU = 3 ' "Many"
       End Select
       
-      If InWords Then
+      If isNumberText Then
         Gaps(eZ) = NumeralRU(CInt(Gaps(eZ)), colCount, CByte(aU)) _
           & WordForm(CStr(colCount))(aU)
         eZ = eZ + 1: If colCount > wtInThousands Then _
-          colCount = colCount - 1 Else colCount = Item ' HotFix!
+          colCount = colCount - 1 Else colCount = Ref_Item ' HotFix!
       Else
-        Gaps(eZ) = Gaps(eZ) & WordForm(CStr(Item))(aU)
+        Gaps(eZ) = Gaps(eZ) & WordForm(CStr(Ref_Item))(aU)
       End If
     Next aU
     
@@ -90,36 +90,36 @@ Function NumberFormatterRU(ByVal Number As Double, ByRef Item As WordFormType, _
   End If: Erase Gaps
 End Function
 
-Private Function NumeralRU(ByRef Digit As Integer, ByRef Item As WordFormType, _
-  state As Byte) As String
-  Attribute NumeralRU.VB_Description = "r313 ¦ Число прописью"
+Private Function NumeralRU(ByRef Ref_Digits As Integer, _
+  ByRef Ref_Item As WordFormType, ByVal state As Byte) As String
+  Attribute NumeralRU.VB_Description = "r314 ¦ Число прописью"
   Dim numeral As Variant, ending As Variant, secondDigit As Byte
   
   ending = [{"а", "", "е", "ь", "и"}]
   numeral = [{"", " один", " дв", " три", " четыр", " пят", " шест", " сем", " восем", " девят"}]
-  numeral(1) = Item < wtInMills And Not Item = wtAsNone ' True = Женский род
+  numeral(1) = Ref_Item < wtInMills And Not Ref_Item = wtAsNone ' True = Женский род
   
-  If Digit > 0 Then ' Если больше нуля
+  If Ref_Digits > 0 Then ' Если больше нуля
     Select Case state
       Case Is = 1
         If numeral(1) Then numeral(2) = " одна" ' Женский род
       Case Is = 2
-        Select Case (Digit Mod 10) ' Одна последняя цифра
+        Select Case (Ref_Digits Mod 10) ' Одна последняя цифра
           Case Is = 2 ' Мужской род
             If Not numeral(1) Then state = 0 ' state - 2
           Case Is = 3: state = 1 ' state - 1
         End Select
       Case Is = 3
-        Select Case (Digit Mod 100) ' Две последних цифры
+        Select Case (Ref_Digits Mod 100) ' Две последних цифры
           Case Is < 10: state = 3 ' state ' HotFix!
           Case Is = 12: state = 2 ' state - 1
           Case Is < 20: state = 1 ' state - 2
         End Select
-    End Select: If (Digit Mod 10) > 0 Then _
-      NumeralRU = numeral(Digit Mod 10 + 1) & ending(state + 1) ' Разряд #1
+    End Select: If (Ref_Digits Mod 10) > 0 Then _
+      NumeralRU = numeral(Ref_Digits Mod 10 + 1) & ending(state + 1) ' Разряд #1
     
-    Select Case (Digit Mod 100) ' Две последних цифры
-      Case Is > 19: secondDigit = (Digit Mod 100) \ 10
+    Select Case (Ref_Digits Mod 100) ' Две последних цифры
+      Case Is > 19: secondDigit = (Ref_Digits Mod 100) \ 10
         Select Case secondDigit ' Разряд #2
           Case Is < 4
             NumeralRU = numeral(secondDigit + 1) _
@@ -135,19 +135,19 @@ Private Function NumeralRU(ByRef Digit As Integer, ByRef Item As WordFormType, _
         NumeralRU = " десять"
     End Select
     
-    If Digit > 99 Then ' Сотни
-      Select Case (Digit \ 100) ' Разряд #3
+    If Ref_Digits > 99 Then ' Сотни
+      Select Case (Ref_Digits \ 100) ' Разряд #3
         Case Is = 1
           NumeralRU = " стo" & NumeralRU
         Case 2 To 4
-          NumeralRU = numeral(Digit \ 100 + 1) _
-            & IIf(Digit \ 100 = 3, "", ending(3)) & "ст" _
-            & IIf(Digit \ 100 = 2, ending(5), ending(1)) & NumeralRU
+          NumeralRU = numeral(Ref_Digits \ 100 + 1) _
+            & IIf(Ref_Digits \ 100 = 3, "", ending(3)) & "ст" _
+            & IIf(Ref_Digits \ 100 = 2, ending(5), ending(1)) & NumeralRU
         Case Else
-          NumeralRU = numeral(Digit \ 100 + 1) & "ьсот" & NumeralRU
+          NumeralRU = numeral(Ref_Digits \ 100 + 1) & "ьсот" & NumeralRU
       End Select
     End If
-  ElseIf Item < wtInThousands Or Item > wtInQuadrills Then
+  ElseIf Ref_Item < wtInThousands Or Ref_Item > wtInQuadrills Then
     If UBound(Gaps) = 0 Then NumeralRU = " ноль"
   End If
 End Function
@@ -207,17 +207,17 @@ Function PorterStemmerRU(ByVal word As String) As String
   PorterStemmerRU = word
 End Function
 
-Private Function RemoveEndings(ByRef word As String, ByVal regex As Variant, _
-  ByVal region As Byte) As Boolean ' Удалить окончание (самое длинное)
-  Attribute PorterStemmerRU.VB_Description = "r313 ¦ Стеммер: удаление окончания"
+Private Function RemoveEndings(ByRef Ref_Word As String, _
+  ByVal regex As Variant, ByVal region As Byte) As Boolean ' Удалить окончание (самое длинное)
+  Attribute RemoveEndings.VB_Description = "r314 ¦ Стеммер: удаление окончания"
   Dim rZ As Byte, prefix As String, regMatch As Variant
   
-  prefix = Mid(word, 1, IIf(region, region, 1) - 1) ' prefix <- region
-  word = Mid(word, Len(prefix) + 1)
+  prefix = Mid(Ref_Word, 1, IIf(region, region, 1) - 1) ' prefix <- region
+  Ref_Word = Mid(Ref_Word, Len(prefix) + 1)
   If IsArray(regex) Then
     For Each regMatch In Split(regex(0))
-      If word Like "*[яа]" & regMatch Then ' Если найден аффикс
-        word = Left(word, Len(word) - Len(regMatch))      
+      If Ref_Word Like "*[яа]" & regMatch Then ' Если найден аффикс
+        Ref_Word = Left(Ref_Word, Len(Ref_Word) - Len(regMatch))      
         RemoveEndings = True: Exit For      
       End If
     Next regMatch: regex = regex(1)
@@ -228,36 +228,36 @@ Private Function RemoveEndings(ByRef word As String, ByVal regex As Variant, _
       On Error Resume Next
         For region = 2 To rZ - 2
           If rZ < 2 Then region = 1: rZ = 2 ' Если нет [list]
-          If word Like "*" & Mid(regMatch, region, 1) & Mid(regMatch, rZ) Then
+          If Ref_Word Like "*" & Mid(regMatch, region, 1) & Mid(regMatch, rZ) Then
             regMatch = Mid(regMatch, region, 1) & Mid(regMatch, rZ)
-            word = Left(word, Len(word) - Len(regMatch))
+            Ref_Word = Left(Ref_Word, Len(Ref_Word) - Len(regMatch))
             RemoveEndings = True: Exit For
           End If: If region = 1 Then Exit For
         Next region: If RemoveEndings Then Exit For
       On Error GoTo 0
     Next regMatch
-  End If: word = prefix & word
+  End If: Ref_Word = prefix & Ref_Word
 End Function
 
-Private Function FindRegions(ByRef rV As Byte, ByVal word As String) As Byte
-  Attribute PorterStemmerRU.VB_Description = "r313 ¦ Стеммер: регион r2"
-  Dim prevChar As String, Char As String, cnt As Byte, state As Byte
+Private Function FindRegions(ByRef Ref_rV As Byte, ByVal word As String) As Byte
+  Attribute FindRegions.VB_Description = "r314 ¦ Стеммер: регион r2"
+  Dim prevChar As String, char As String, cnt As Byte, state As Byte
   
-  If isVowel(Left(word, 1)) Then rV = 2: state = 1 ' После первой гласной
+  If isVowel(Left(word, 1)) Then Ref_rV = 2: state = 1 ' После первой гласной
   For cnt = 2 To Len(word)
-    prevChar = Mid(word, cnt - 1, 1): Char = Mid(word, cnt, 1)
+    prevChar = Mid(word, cnt - 1, 1): char = Mid(word, cnt, 1)
     Select Case state
-      Case 0: If isVowel(Char) Then rV = cnt + 1: state = 1
-      Case 1: If Not isVowel(Char) And isVowel(prevChar) Then state = 2
-      Case 2: If Not isVowel(Char) And isVowel(prevChar) Then _
+      Case 0: If isVowel(char) Then Ref_rV = cnt + 1: state = 1
+      Case 1: If Not isVowel(char) And isVowel(prevChar) Then state = 2
+      Case 2: If Not isVowel(char) And isVowel(prevChar) Then _
         FindRegions = cnt + 1: Exit For
     End Select
   Next i
 End Function
 
-Private Function isVowel(ByVal Char As String) As Boolean
-  Attribute PorterStemmerRU.VB_Description = "r313 ¦ Гласная буква"
+Private Function isVowel(ByVal char As String) As Boolean
+  Attribute isVowel.VB_Description = "r314 ¦ Гласная буква"
   Const VOWEL As String = "[ёаеиоуыэюя]"
   
-  isVowel = InStr(Mid(VOWEL, 2, Len(VOWEL) - 1), Char)
+  isVowel = InStr(Mid(VOWEL, 2, Len(VOWEL) - 1), char)
 End Function

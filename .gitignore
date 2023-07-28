@@ -1,26 +1,28 @@
-#############
+####################
 ## Windows detritus
-#############
+####################
 schema/
 *.do[ct][mx]
 *.xl[ast][bmx]
 *.vbs
 
-# Windows image file caches
-Thumbs.db
-ehthumbs.db
-
-# Folder config file
+# Folder config and Image file caches
 [Dd]esktop.ini
+*[Tt]humbs.db
+
+# Logs and shortcuts
+*.lnk
+*.log
 
 # Excel Backup File
+*.asd
 *.bak
-*.log
 *.xar
 *.xlk
 
 # Recycle Bin used on file shares
 ~$*.doc*
 ~$*.xls*
-$RECYCLE.BIN/
+$R[Ee][Cc][Yy][Cc][Ll][Ee].B[Ii][Nn]/
 *.tmp
+*.zip
