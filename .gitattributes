@@ -10,6 +10,7 @@
 
 *.bas	working-tree-encoding=cp1251
 *.cls	working-tree-encoding=cp1251
+*.json  eol=lf
 *.rels	
 *.vml	linguist-generated	linguist-language=xml
 *.xml	

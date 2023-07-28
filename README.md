@@ -7,7 +7,7 @@
 
 2. При редактировании в [удалённом хранилище] файлы пересохраняются в кодировке `UTF-8`.
 
-3. Отредактированные файлы в папке `/src/*.*` после [скачивания в ZIP] 
+3. Отредактированные файлы в папке `<REPO>/src/*.*` после [скачивания в ZIP] 
    необходимо открыть в **Текстовом редакторе** в кодировке `windows-1251`.
 
 4. Чтобы после импортирования модулей каждый раз при сохранении (и автосохранении) 
@@ -40,8 +40,25 @@
    ```
 
 3. Используйте текстовый редактор, который при сохранении файлов оставляет только 
-   единственный символ переноса строк `CRLF`. Теперь можно работать с файлами 
-   через Git Bash или Git Desktop Client не заботясь о кодировке.
+   единственный символ переноса строк `CRLF`. Репозиторий имеет настройки для работы в 
+   Git Bash или Git Desktop Client. Для работы в текстовом редакторе **vscode** 
+   необходимо добавить следующие настройки:
+   ``` json
+   "[vb][vba]": {
+   	"editor.defaultFormatter": "serkonda7.vscode-vba",
+   	"editor.insertSpaces": true,
+   	"editor.fontFamily": "Menlo, Monaco, 'Courier New', monospaces",
+   	"editor.fontSize": 13,
+   	"editor.language.brackets": [ [ "(", ")" ] ],
+   	"editor.lineHeight": 16,
+   	"editor.maxTokenizationLineLength": 2000,
+   	"editor.rulers": [ 80, { "column": 120, "color": "#ff0000" } ],
+   	"editor.tabSize": 2,
+   	"files.autoGuessEncoding": true,
+   	"files.encoding": "windows1251",
+   	"files.insertFinalNewline": true
+   },
+   ```
 
 [клиентский хук]: //gist.github.com/c55f1538454755fdff71fba0d686e371
 

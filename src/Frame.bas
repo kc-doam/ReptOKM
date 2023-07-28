@@ -2,7 +2,7 @@ Attribute VB_Name = "Frame"
 Option Explicit
 Option Base 1
 Option Private Module
-'123456789012345678901234567890123456h8nor@ya56789012345678901234567890123456789
+'123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
 ' Коллекция с именами папок статистик
 Public DirName As New Collection
@@ -27,7 +27,7 @@ Function GetUserName(Optional ByVal setUserDomain = False) As String
 End Function
 
 Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
-  Attribute Auto_Open.VB_Description = "r314 ¦ Автозапуск"
+  Attribute Auto_Open.VB_Description = "r315 ¦ Автозапуск"
   Dim max As Integer, modulo As Integer, item As Variant, Paths() As Variant
   Const HOST As String = "#Finansist\YCHET\"
   
@@ -39,31 +39,30 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
   ' Очищаем коллекции с именами папок и с именами файлов
   Set DirName = Nothing: Set FileName = Nothing: Set Manager = Nothing
   ' Массив каталогов ВСЕХ существующих Банков (+ косая черта в конце строки)
-  Paths = Array(Replace(HOST, "YCHET", "#KF_KBO") & "POSTE\", _
+  Paths = Array(0, Replace(HOST, "YCHET", "#KF_KBO") & "POSTE\", _
     HOST & "Вопросы под заказ\", HOST & "Вопросы под заказ\Базы\", _
     HOST & "Рецензирование ИБ Финансист\", HOST & "ИБ Юридическая пресса\", _
-    HOST & "Азбука \", HOST & UCase("Перезакупка\"), HOST) ' r314
+    HOST & "Азбука \", HOST & UCase("Перезакупка\"), HOST) ' r315
   
   ' Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
   If CRC_HOST > 2 ^ UBound(Paths) Then _
     MsgBox "CRC_HOST Error", vbCritical: Exit Sub
   max = CRC_HOST Mod 2 ^ UBound(Paths) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N+1]
   
-  For item = UBound(Paths) To 1 Step -1
+  For item = UBound(Paths) To 2 Step -1
     modulo = CRC_HOST Mod 2 ^ (item - 1) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N]
     ' Если ТЕКУЩИЙ остаток <= ПРЕДЫДУЩИЙ остаток, То исключить каталог
     If max <= modulo Then Paths(item) = Empty
     max = modulo
-  Next item
-  For Each item In Paths ' Назначаем коллекцию листов для каждого Банка
-    If Len(item) > 0 Then max = max + 1: GetWorkbooks item: _
-      If Not Right(item, 1) = Chr(&H5C) Then max = max - 1
-  Next item
-  ' r314
+    If Len(Paths(item)) > 0 Then
+      Call GetWorkbooks(Paths(item))
+      If Right(Paths(item), 1) = Chr(&H5C) Then Paths(1) = Paths(1) + 1
+    End If
+  Next item: max = Paths(1): Paths(1) = Empty ' HotFix!
   If CRC_HOST > 0 Then Paths = Array(String(2, vbCr), Replace(Join(Paths), _
     "\ ", "\" & vbLf), "Сформировать отчёт по файлам в каталогах? ", _
     " (каталоги: " & max & ", файлы: " & FileName.Count & ")") ' ИНФО сообщение
-  For modulo = 1 To FileName.count
+  For modulo = 1 To FileName.Count
     For Each item In Workbooks ' Проверка: закрыть все книги
       If item.Name = FileName(modulo) Then MsgBox "Необходимо закрыть файл """ _
         & FileName(modulo) & """", vbCritical: item = vbNo: Exit Sub
@@ -83,22 +82,22 @@ Static Sub DialogButtons_Click()
   If objDialogBox Is Nothing Then Exit Sub ' HotFix!
   With objDialogBox
     Select Case .Buttons(Application.Caller).Index
-      Case 1
+      Case Is = 1
         For Each item In FileName: str = str & vbCr & item: Next item: MsgBox _
           "Список файлов для формирования отчёта: " & vbCr & str, vbInformation
-      Case 3: .Visible = xlSheetVisible ' IsChanged = -1
+      Case Is = 3: .Visible = xlSheetVisible ' IsChanged = -1
     End Select
   End With
 End Sub
 
 Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
   ByRef Ref_Lbls As Variant)
-  Attribute GetForm_DialogElements.VB_Description = "r314 ¦ Создание диалогового окна"
+  Attribute GetForm_DialogElements.VB_Description = "r315 ¦ Создание диалогового окна"
   Const PIXEL As Single = 5.25 ' Lbls: 1= Files, 2= Dirs, 3= Text, 4= Title
   
   Application.DisplayAlerts = False
   
-  While DialogSheets.count > 0 ' Удаление всех временных форм
+  While DialogSheets.Count > 0 ' Удаление всех временных форм
     DialogSheets(1).Delete
   Wend: Set objDialogBox = DialogSheets.Add
   With objDialogBox
@@ -108,17 +107,18 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
     End With ': .Buttons(1).Delete
     With .Buttons(1)
       If FileName.Count = 0 Then .Enabled = False
-      .Left = PIXEL * 50: .Top = PIXEL * 20: .Text = "Список"
+      .Left = PIXEL * 50: .Top = PIXEL * 20: .text = "Список"
       .Width = PIXEL * 10: .Height = PIXEL * 3
       .OnAction = "DialogButtons_Click": .DismissButton = False ' Отклонить
     End With: With .Buttons(2)
-      .Left = PIXEL * 50: .Top = PIXEL * 12: .Text = "Нет"
+      .Left = PIXEL * 50: .Top = PIXEL * 12: .text = "Нет"
       .Width = PIXEL * 10: .Height = PIXEL * 3
     End With
 
     ' Граница объектов: Left[P=>13], Top[P=>6], Width[P=<50], Heigth[P=<35]
     Select Case formType
-      Case dtDateRange ' ДИАПАЗОН ' r314
+
+      Case Is = dtDateRange ' ДИАПАЗОН ' r314
         With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
           .text = "Введите начало периода: "
         End With
@@ -143,8 +143,52 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
               Year(Date)), 9 + 1, 0), "/", ".") ' Сентябрь
           End If
         End With
+        
+      Case Is = dtDateMonth ' МЕСЯЦ ' r315
+        Stop
+        
+      Case Is = dtDateQuarter ' КВАРТАЛ ' r315
+        With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
+          .text = "Выберите квартал: "
+        End With
+        With .DropDowns.Add(PIXEL * 36, PIXEL * 8, PIXEL * 12, PIXEL * 3)
+          .Name = "QuarterNum"
+          .DropDownLines = 4
+          .AddItem "1 кварт."
+          .AddItem "2 кварт."
+          .AddItem "3 кварт."
+          .AddItem "4 кварт."
+          .Value = IIf((Month(Date) - 1) \ 3 < 1, 4, (Month(Date) - 1) \ 3)
+        End With
+        With .Labels.Add(PIXEL * 15, PIXEL * 12, PIXEL * 20, PIXEL * 3)
+          .text = "Введите год: "
+        End With
+        With .EditBoxes.Add(PIXEL * 36, PIXEL * 12, PIXEL * 12, PIXEL * 3)
+          .Name = "QuarterYear"
+          .text = IIf(Month(Date) >= 3, Year(Date), Year(Date) - 1)
+        End With
+        
+      Case Is = dtDateSemester ' ПОЛУГОДИЕ ' r315
+        With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 21, PIXEL * 3)
+          .text = "Выберите полугодие: "
+        End With
+        With .DropDowns.Add(PIXEL * 36, PIXEL * 8, PIXEL * 12, PIXEL * 3)
+          .Name = "SemesterNum"
+          .DropDownLines = 2
+          .AddItem "Окт - Мар"
+          .AddItem "Апр - Сен"
+          .Value = IIf((Month(Date) - 1) < 4 Or (Month(Date) - 1) > 9, 2, 1)
+        End With
+        With .Labels.Add(PIXEL * 15, PIXEL * 12, PIXEL * 21, PIXEL * 3)
+          .text = "Введите год: "
+        End With
+        With .EditBoxes.Add(PIXEL * 36, PIXEL * 12, PIXEL * 12, PIXEL * 3)
+          .Name = "SemesterYear"
+          .text = IIf(Month(Date) >= 3, Year(Date), Year(Date) - 1)
+        End With
+      
     End Select
-
+    
     With .Labels.Add(PIXEL * 15, PIXEL * 16, PIXEL * 35, PIXEL * 21)
       Ref_Lbls(2) = ClearSpacesInText(Ref_Lbls(2))
       .text = Ref_Lbls(3) & String(2, vbLf) & Replace(Ref_Lbls(2), "#Finansist\", "> ")
@@ -163,10 +207,26 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
       Ref_Lbls(2) = Empty: Ref_Lbls(3) = Empty
       On Error Resume Next
       '< <<<
-      Select Case formType ' r314
-        Case dtDateRange ' ДИАПАЗОН
-          Ref_Lbls(2) = CDate(.EditBoxes("DateBegin").text)
-          Ref_Lbls(3) = CDate(.EditBoxes("DateEnd").text)
+      Select Case formType ' r315
+        
+        Case Is = dtDateRange ' ДИАПАЗОН
+          Ref_Lbls(2) = CDate(.EditBoxes("DateEnd").text)
+          Ref_Lbls(3) = CDate(.EditBoxes("DateBegin").text)
+
+        Case Is = dtDateMonth ' МЕСЯЦ
+          Stop
+
+        Case Is = dtDateQuarter ' КВАРТАЛ
+          Ref_Lbls(2) = DateSerial(.EditBoxes("QuarterYear").text, _
+            .DropDowns("QuarterNum").Value * 3 + 1, 0)
+          Ref_Lbls(3) = DateSerial(IIf(Month(Ref_Lbls(2)) >= 3, Year( _
+            Ref_Lbls(2)), Year(Ref_Lbls(2)) - 1), Month(Ref_Lbls(2)) - 2, 1)
+
+        Case Is = dtDateSemester ' ПОЛУГОДИЕ
+          Ref_Lbls(2) = DateSerial(.EditBoxes("SemesterYear").text, _
+            IIf(.DropDowns("SemesterNum").Value > 1, 10, 4), 0)
+          Ref_Lbls(3) = DateAdd("m", -6, DateAdd("d", 1, Ref_Lbls(2)))
+        
       End Select
       '> >>>
       On Error GoTo 0
@@ -178,32 +238,69 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
 End Sub
 
 Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
-  Attribute GetWorkbooks.VB_Description = "r314 ¦ Запись найденных баз/статистик в коллекцию"
-  Dim strName As String: strName = GetMainPath & pathName
+  Attribute GetWorkbooks.VB_Description = "r315 ¦ Запись найденных баз/статистик в коллекцию"
+  Dim strName As String, Item As Variant: pathName = GetMainPath & pathName
+  Const HOST As String = "*Finansist\YCHET\"
   
   ' Возвращаем в strName первый найденный файл по маске *.xl*
   On Error GoTo ErrDir
   '< <<<
-  If (GetAttr(strName) And vbDirectory) = vbDirectory Then
+  If (GetAttr(pathName) And vbDirectory) = vbDirectory Then
     With ThisWorkbook
       If DirName.Count = 0 And Right(.Name, 2) = "sm" Then _
-        WriteLog Left(strName, InStr(23, strName, "\")) & "Архив\", _
-        IIf(.ReadOnly, "Чтение", "Запись")
+        WriteLog Left(pathName, InStr(23, pathName, "\")) & "Архив\", _
+          IIf(.ReadOnly, "Чтение", "Запись")
     End With
     ' Возвращаем в strName первый найденный файл по маске *.xl*
-    strName = Dir(strName & "*.xl*", vbNormal)
+    strName = Dir(pathName & "*.xl*", vbNormal)
     Do While strName <> vbNullString ' Выполнять ПОКА
       ' Применяем дополнительную маску для выборки файлов
-      If Not strName Like "*.lnk" And Not LCase(strName) Like "*копия*" _
-      And Not LCase(strName) Like "*отдел*" And (IIf(pathName Like "*\Баз*", _
-        strName Like "База_*", strName Like "[Сс]татистика_*")) Then
-        DirName.Add GetMainPath & pathName: FileName.Add strName
-      End If: strName = Dir
+      For Each Item In Split(WORKBOOKS_FILTER, "$")
+        If strName Like Item Then
+          Select Case True
+            
+            Case Is = pathName Like Replace(HOST, "YCHET", "[#]KF_KBO") & "POSTE\"
+              Debug.Print " SKIP #KF_KBO: "; strName: Item = Empty
+              
+            Case Is = pathName Like HOST & "Вопросы под заказ\"
+              If strName Like "Вопросы_*.xls*" Then Item = strName
+              
+            Case Is = pathName Like HOST & "Вопросы под заказ\Базы\"
+              If strName Like "База_*.xls*" Then Item = strName
+              
+            Case Is = pathName Like HOST & "Рецензирование ИБ Финансист\", _
+            pathName Like HOST & "ИБ Юридическая пресса\", _
+            pathName Like HOST & "Азбука*", pathName Like HOST
+              If strName Like "*[Сс]татистика_*.xls*" Then Item = strName
+              
+            Case Is = pathName Like HOST & UCase("Перезакупка\")
+              If strName Like "*перезакупк[аи]_*.xls*" Then Item = strName
+              
+            Case Else
+              Debug.Print "SKIP #ELSE: "; strName: Item = Empty
+              If strName Like "*[Сс]татистика_*.xls*" Then Item = strName ' TEST
+              Stop
+              
+          End Select
+          If Not Item Like "*.lnk" And Not LCase(Item) Like "*копия*" _
+          And Not LCase(Item) Like "*отдел*" And Len(Item) > 5 Then
+            DirName.Add pathName: FileName.Add Item
+          
+            Debug.Print "+DONE "; Item
+          Else
+            Debug.Print " SKIP "; strName
+          End If
+          
+        Else
+          Debug.Print "-SKIP "; strName; " LIKE " & Item
+          
+        End If
+      Next Item: strName = Dir
     Loop
   End If
   '> >>>
   Exit Sub
-
+  
   ErrDir:
     'If Err.Number = 76 Then pathName = ActiveWorkbook.Path & "\": Resume Next ' TEST ' r314
     If Not strName Like "*\*.xl*" And Err.Number = 53 Then Err.Number = 75
@@ -212,7 +309,7 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
       Case Is = 75: strName = "Нет доступа к файлу: "
       Case Is = 457: Exit Sub
       Case Else: strName = "Проверьте сетевой путь. Нет доступа к каталогу: "
-    End Select: MsgBox strName & vbCr & GetMainPath & pathName _
+    End Select: MsgBox strName & vbCr & pathName _
       & IIf(Err.Number = 53, "#FILE", ""), vbCritical
     If Err.Number = 5 Or Err.Number = 53 Or Err.Number >= 75 Then End
 End Sub
