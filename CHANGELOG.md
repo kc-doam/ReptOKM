@@ -6,7 +6,7 @@
  - Add *sub* `Ribbon_GetVisibleMenu` **событие впереключение видимости объектов пользовательского меню**
  - Add *sub* `Ribbon_Initialize` **событие отрисовки пользовательского меню**
 
-[2023.07.9-alpha]: ../../commit/1bf8d574
+[2023.07.9-alpha]: ../../commit/58120f73
 
 ### [2023.07.8-beta]
  > * Rename *objects*
@@ -28,7 +28,7 @@
  - Add *const* `WORKBOOKS_FILTER` **выбор определённых имён файлов, разделитель `$`**
  * Fix *function* `Taxpayer_Number_CRC` **исправлена ошибка**
 
-[2023.07.8-beta]: ../../commit/45fb4c25
+[2023.07.8-beta]: ../../commit/1bf8d574
 
 ### [2020.07.7-alpha]
  > * Fix *sub* `NumeralRU` **исправлена ошибка подсчёта `secondDigit`**
@@ -45,7 +45,7 @@
  - Add *function* `FindRegions` **Стеммер: поиск 'региона r2'**
  - Add *function* `isVowel` **гласная буква**
 
-[2020.06.7-alpha]: ../../commit/14650a0b
+[2020.07.7-alpha]: ../../commit/45fb4c25
 
 ### [2020.04.6-alpha] \[num-formatter\]
  - Add *object* `WordForm` as *collection* **список существительных в категории чисел**
