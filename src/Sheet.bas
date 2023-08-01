@@ -7,7 +7,7 @@ Private Const PRE = "STAT_"
 
 Public Sub GetBanks(ByRef Ref_ID As Collection, _
   Optional ByRef Ref_SUPP As Collection)
-  Attribute GetBanks.VB_Description = "r314 ¦ Определение структуры файла статистики"
+  Attribute GetBanks.VB_Description = "r316 ¦ Определение структуры файла статистики"
   If Not Ref_ID.Count = 0 Then Exit Sub ' HoxFix!
   Dim objNamed As Object, bank As String, field As String
   ' ВАЖНАЯ ЧАСТЬ! Заголовки найденных именованных диапазонов в коллекции
@@ -66,7 +66,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
   '      If .RefersTo Like "*[#]NAME[?]*" Or .RefersTo Like "*[#]REF!*" Then
   '        bank = .Parent.Worksheets(GetSheetID("STAT", False)).Index
         ' Внутренние диапазоны ' r313
-        If .Name Like "_xl*" Then Debug.Print "Системный диапазон "; .Name
+        If .Name Like "_xl*" Then HookMsg "Системный диапазон " & .Name, vbOKCancel
         
         If .Name Like "*_*" Xor .Name Like "*!_*" Then
   '        Debug.Print .Name; " Is In Worksheet = "; .ValidWorkbookParameter
@@ -175,7 +175,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
         End If
         
         If Err.Number = 1004 And Not Len(bank) > 0 Then
-          MsgBox "В книге """ & ActiveWorkbook.Name & """ поломан именованный" _
+          HookMsg "В книге """ & ActiveWorkbook.Name & """ поломан именованный" _
             & " диапазон """ & .Name & """, либо лист защищён от записи. " _
             & vbCr & "Для просмотра связей используйте комбинацию кнопок " _
             & "Ctrl+F3. ", vbCritical: End ' r314
@@ -189,7 +189,7 @@ End Sub
 
 Function GetSupplerRec(ByVal suppName As String, ByVal checkDate As Variant, _
   Optional ByVal isForce_SearchSupp As Boolean = False) As Integer
-  Attribute GetSupplerRec.VB_Description = "r314 ¦ Поиск записи контрагента"
+  Attribute GetSupplerRec.VB_Description = "r316 ¦ Поиск записи контрагента"
   Dim tRelevant As Double, aU As Variant, eZ As Byte, nZ As Integer
   
   If IsNumeric(checkDate) And Not IsEmpty(suppName) Then
@@ -220,7 +220,7 @@ Function GetSupplerRec(ByVal suppName As String, ByVal checkDate As Variant, _
         End If
       Next nZ: GetSupplerRec = GetSupplerRec + xSUPP("head") - 1
     Else
-      Debug.Print checkDate & " isn't a Date"
+      HookMsg checkDate & " isn't a Date", vbOKCancel
     End If
   End If
 End Function
@@ -260,6 +260,20 @@ Function GetSheetID(ByVal sheetCodeName As String, _
       GetSheetID = objSheet.Index: Exit For
   Next objSheet: Set objSheet = Nothing: Set objBook = Nothing
 End Function
+
+Public Sub HookMsg(ByVal promt As Variant, ByVal style As VbMsgBoxStyle, _
+  Optional title As String)
+  Attribute HookMsg.VB_Description = "r316 ¦ Вывод сообщений в окно 'Immediate' в режиме IS_DEBUG"
+  If style > vbRetryCancel And IS_DEBUG Then style = vbRetryCancel
+  Select Case style
+    Case Is = vbOKCancel
+      Debug.Print promt
+    Case Is = vbRetryCancel
+      Debug.Print IIf(IS_DEBUG, "[DEBUG MODE] ", ""); promt
+    Case Else
+      MsgBox promt, style, IIf(Trip(Len(title)) > 0, title, Application.Name)
+  End Select
+End Sub
 
 Public Sub DeleteModulesAndCode(ByRef Ref_Book As Object) ' Удалить модули
   Attribute DeleteModulesAndCode.VB_Description = "r314 ¦ Удалить модули из книги"

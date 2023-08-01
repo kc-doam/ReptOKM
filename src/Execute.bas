@@ -4,7 +4,7 @@ Option Base 1
 '123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
 Public Sub Shell_Sort(ByRef Ref_Items As Variant, ByVal getColumn As Byte)
-  Attribute Shell_Sort.VB_Description = "r314 ¦ Сортировка методом Шелла"
+  Attribute Shell_Sort.VB_Description = "r316 ¦ Сортировка методом Шелла"
   ' Сортировка методом Шелла Дональда с интервалами длин ЭМ Марцина Циура
   ' http://ru.wikibooks.org/wiki/Примеры_реализации_сортировки_Шелла#VBA
   Dim cnt As Integer, gap As Integer, pos As Integer, inv_a108870 As Variant
@@ -42,7 +42,7 @@ Public Sub Shell_Sort(ByRef Ref_Items As Variant, ByVal getColumn As Byte)
       nZ = nZ + 1
     Loop Until gap = 1 ' Цикл ДО
   Else
-  '  Debug.Print "Shell_Sort: В массиве ОДНА или НУЛЬ записей"
+  '  HookMsg "Shell_Sort: В массиве ОДНА или НУЛЬ записей", vbOKCancel
   End If
 End Sub
 

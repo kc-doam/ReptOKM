@@ -27,7 +27,7 @@ Function GetUserName(Optional ByVal setUserDomain = False) As String
 End Function
 
 Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
-  Attribute Auto_Open.VB_Description = "r315 ¦ Автозапуск"
+  Attribute Auto_Open.VB_Description = "r316 ¦ Автозапуск"
   Dim max As Integer, modulo As Integer, item As Variant, Paths() As Variant
   Const HOST As String = "#Finansist\YCHET\"
   
@@ -46,7 +46,7 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
   
   ' Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
   If CRC_HOST > 2 ^ UBound(Paths) Then _
-    MsgBox "CRC_HOST Error", vbCritical: Exit Sub
+    HookMsg "CRC_HOST Error", vbCritical: Exit Sub
   max = CRC_HOST Mod 2 ^ UBound(Paths) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N+1]
   
   For item = UBound(Paths) To 2 Step -1
@@ -64,11 +64,12 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
     " (каталоги: " & max & ", файлы: " & FileName.Count & ")") ' ИНФО сообщение
   For modulo = 1 To FileName.Count
     For Each item In Workbooks ' Проверка: закрыть все книги
-      If item.Name = FileName(modulo) Then MsgBox "Необходимо закрыть файл """ _
+      If item.Name = FileName(modulo) Then HookMsg "Необходимо закрыть файл """ _
         & FileName(modulo) & """", vbCritical: item = vbNo: Exit Sub
     Next item: Paths(1) = Paths(1) & FileName(modulo) & vbCr
   Next modulo: If max = 0 Then Paths = Array(True, Date, Empty, Paths(4))
-  If FileName.Count > 0 Then GetForm_DialogElements dtDateRange, Paths
+  If FileName.Count > 0 Then GetForm_DialogElements dtDateRange, Paths _
+    Else HookMsg "ОШИБКА! Нет книг по критерием отбора", vbRetryCancel  
   '-> NEXT
   
   If Not Paths(LBound(Paths)) Then ActiveWorkbook.Saved = True Else _
@@ -238,7 +239,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
 End Sub
 
 Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
-  Attribute GetWorkbooks.VB_Description = "r315 ¦ Запись найденных баз/статистик в коллекцию"
+  Attribute GetWorkbooks.VB_Description = "r316 ¦ Запись найденных баз/статистик в коллекцию"
   Dim strName As String, Item As Variant: pathName = GetMainPath & pathName
   Const HOST As String = "*Finansist\YCHET\"
   
@@ -260,7 +261,7 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
           Select Case True
             
             Case Is = pathName Like Replace(HOST, "YCHET", "[#]KF_KBO") & "POSTE\"
-              Debug.Print " SKIP #KF_KBO: "; strName: Item = Empty
+              HookMsg " SKIP #KF_KBO: " & strName, vbOKCancel: Item = Empty
               
             Case Is = pathName Like HOST & "Вопросы под заказ\"
               If strName Like "Вопросы_*.xls*" Then Item = strName
@@ -277,7 +278,7 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
               If strName Like "*перезакупк[аи]_*.xls*" Then Item = strName
               
             Case Else
-              Debug.Print "SKIP #ELSE: "; strName: Item = Empty
+              HookMsg "#ELSE: " & strName, vbRetryCancel: Item = Empty
               If strName Like "*[Сс]татистика_*.xls*" Then Item = strName ' TEST
               Stop
               
@@ -286,13 +287,13 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
           And Not LCase(Item) Like "*отдел*" And Len(Item) > 5 Then
             DirName.Add pathName: FileName.Add Item
           
-            Debug.Print "+DONE "; Item
+            HookMsg "+DONE " & Item, vbOKCancel
           Else
-            Debug.Print " SKIP "; strName
+            HookMsg " SKIP " & strName, vbOKCancel
           End If
           
         Else
-          Debug.Print "-SKIP "; strName; " LIKE " & Item
+          HookMsg "-SKIP " & strName & " LIKE " & Item, vbOKCancel
           
         End If
       Next Item: strName = Dir
@@ -309,7 +310,7 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
       Case Is = 75: strName = "Нет доступа к файлу: "
       Case Is = 457: Exit Sub
       Case Else: strName = "Проверьте сетевой путь. Нет доступа к каталогу: "
-    End Select: MsgBox strName & vbCr & pathName _
+    End Select: HookMsg strName & vbCr & pathName _
       & IIf(Err.Number = 53, "#FILE", ""), vbCritical
     If Err.Number = 5 Or Err.Number = 53 Or Err.Number >= 75 Then End
 End Sub

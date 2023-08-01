@@ -1,3 +1,18 @@
+### [2023.08.10-alpha]
+ > * Fix *sub* `Shell_Sort` **переработано**
+ > * Fix *sub* `GetWorkbooks` **переработано**
+ > * Fix *sub* `Main_Sub` **переработано**
+ > * Fix *sub* `Ribbon_GetEnabledMacro` **переработано**
+ > * Fix *sub* `Ribbon_GetVisibleMenu` **переработано**
+ > * Fix *sub* `Ribbon_Initialize` **переработано**
+ > * Fix *sub* `GetBanks` **переработано**
+ > * Fix *function* `GetSupplerRec` **переработано**
+ * Fix *sub* `Auto_Open` **добавлена проверка выбранных книг по критериям отбора**
+ - Add *const* `IS_DEBUG` **Режим отладки для сообщений**
+ - Add *sub* `HookMsg` **Вывод сообщений в окно *Immediate* в режиме отладки; заменяет `MsgBox`**
+ 
+[2023.08.10-alpha]: ../../
+
 ### [2023.07.9-alpha]
  > * Fix *sub* `Auto_Open` **переработан массив директорий `Paths`**
  > * Fix *function* `NumberFormatterRU` **переработано** && Rename *variable* ~`InWords`~ to `isNumberText`
