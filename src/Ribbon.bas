@@ -1,6 +1,7 @@
 Attribute VB_Name = "Ribbon"
 Option Explicit
 Option Base 1
+Option Private Module
 '123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
 Private Sub Ribbon_GetEnabledMacro(ByVal objRC As IRibbonControl, ByRef Enabled)

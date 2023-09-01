@@ -8,8 +8,8 @@
 *.md	diff=markdown
 *.txt	
 
-*.bas	working-tree-encoding=cp1251
-*.cls	working-tree-encoding=cp1251
+*.bas	linguist-language=vba   working-tree-encoding=cp1251
+*.cls	linguist-language=vba   working-tree-encoding=cp1251
 *.json  eol=lf
 *.rels	
 *.vml	linguist-generated	linguist-language=xml

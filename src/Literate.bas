@@ -26,9 +26,9 @@ End Enum
 
 Private Gaps() As String, WordForm As New Collection
 
-Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As WordFormType, _
+Public Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As WordFormType, _
   Optional ByVal isNumberText As Boolean = False) As String '> Число в слово
-  Attribute NumberFormatterRU.VB_Description = "r314 ¦ Количество существительного (из списка)"
+  Attribute NumberFormatterRU.VB_Description = "r317 ¦ Количество существительного (из списка)"
   Attribute NumberFormatterRU.VB_ProcData.VB_Invoke_Func = " \n7"
   '' "Один", "Два", "Шесть" Именительный падеж (есть что?)
   '' "Одного", "Двух", "Шести" Родительный падеж (нет чего?)
@@ -64,7 +64,7 @@ Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As WordFormTyp
   
   ' Item < UnitTyte.MinIndex Xor Item >= WordForm.Count + UnitTyte.MinIndex
   If Ref_Item < wtAsTonne Xor Ref_Item >= WordForm.Count + wtAsTonne Then ' HotFix!
-    Debug.Print "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Ref_Item
+    HookMsg "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Ref_Item, vbOKCancel
     NumberFormatterRU = number
   Else
     For Each aU In Gaps
@@ -152,7 +152,7 @@ Private Function NumeralRU(ByRef Ref_Digits As Integer, _
   End If
 End Function
 
-Function PorterStemmerRU(ByVal word As String) As String
+Public Function PorterStemmerRU(ByVal word As String) As String
   Attribute PorterStemmerRU.VB_Description = "r313 ¦ Uni test failed: Стеммер Мартина Портера для русского языка"
   ' Переписано с http://snowball.tartarus.org/algorithms/russian/stemmer.html
   
@@ -240,16 +240,16 @@ Private Function RemoveEndings(ByRef Ref_Word As String, _
 End Function
 
 Private Function FindRegions(ByRef Ref_rV As Byte, ByVal word As String) As Byte
-  Attribute FindRegions.VB_Description = "r314 ¦ Стеммер: регион r2"
+  Attribute FindRegions.VB_Description = "r317 ¦ Стеммер: регион r2"
   Dim prevChar As String, char As String, cnt As Byte, state As Byte
   
   If isVowel(Left(word, 1)) Then Ref_rV = 2: state = 1 ' После первой гласной
   For cnt = 2 To Len(word)
     prevChar = Mid(word, cnt - 1, 1): char = Mid(word, cnt, 1)
     Select Case state
-      Case 0: If isVowel(char) Then Ref_rV = cnt + 1: state = 1
-      Case 1: If Not isVowel(char) And isVowel(prevChar) Then state = 2
-      Case 2: If Not isVowel(char) And isVowel(prevChar) Then _
+      Case Is = 0: If isVowel(char) Then Ref_rV = cnt + 1: state = 1
+      Case Is = 1: If Not isVowel(char) And isVowel(prevChar) Then state = 2
+      Case Is = 2: If Not isVowel(char) And isVowel(prevChar) Then _
         FindRegions = cnt + 1: Exit For
     End Select
   Next i

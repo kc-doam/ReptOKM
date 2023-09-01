@@ -3,17 +3,17 @@ Option Explicit
 Option Base 1
 '123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
-Private Const PRE = "STAT_"
+Private LastRow as Long ' r317
 
 Public Sub GetBanks(ByRef Ref_ID As Collection, _
   Optional ByRef Ref_SUPP As Collection)
-  Attribute GetBanks.VB_Description = "r316 ¦ Определение структуры файла статистики"
+  Attribute GetBanks.VB_Description = "r317 ¦ Определение структуры файла статистики"
   If Not Ref_ID.Count = 0 Then Exit Sub ' HoxFix!
   Dim objNamed As Object, bank As String, field As String
   ' ВАЖНАЯ ЧАСТЬ! Заголовки найденных именованных диапазонов в коллекции
   Dim Банк_Ключ As New Collection ' r314
   Dim Банк_N_Листа As New Collection ' r314
-  Dim Банк_N_Строки_заголовка As New Collection ' r314
+  Dim Банк_N1_Записи As New Collection ' r317
   Dim Номер_вопроса As New Collection
   Dim Имя_Контрагента As New Collection
   Dim Дата_Поступления As New Collection
@@ -32,7 +32,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
   ' Включаемые Банки: СВ, ПВ, П+А, БО, КФ, ЮП, VIP, SEO, ЛК, РЦ
   Ref_ID.Add Банк_N_Листа, "sheet" ' r314
   ' Номер строки, в которой находятся заголовки таблицы банка «HEAD»
-  Ref_ID.Add Банк_N_Строки_заголовка, "head" ' r314
+  Ref_ID.Add Банк_N1_Записи, "line" ' r317
   ' Номер колонки «№ вопроса»
   Ref_ID.Add Номер_вопроса, "QNum"
   ' Номер колонки «Поставщик (кратко)»
@@ -69,12 +69,16 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
         If .Name Like "_xl*" Then HookMsg "Системный диапазон " & .Name, vbOKCancel
         
         If .Name Like "*_*" Xor .Name Like "*!_*" Then
-  '        Debug.Print .Name; " Is In Worksheet = "; .ValidWorkbookParameter
+          HookMsg .Name & " Is In Worksheet = " & .ValidWorkbookParameter, vbRetryCancel
+          ' Вероятнее всего банк имеет поле 'Comment'  ' r317
+          If field = "Comment" Then HookMsg "Банк" & Replace(bank, _
+            "_PART", "_SF") & " имеет Комментарий", vbRetryCancel ' r317
           On Error Resume Next
           '< <<<
           Select Case .RefersToRange.Count
             Case Is = 1
               bank = .RefersToRange.Worksheet.CodeName ' r313
+              bank = Replace(bank, "_PART", "_SF") ' r317
               bank = IIf(Left(.Name, InStr(.Name, "_") - 1) = "SUPP", _
                 "SUPP", Left(.Name, InStr(.Name, "_")) _
                 & Mid(bank, InStr(bank, "_") + 1)) ' HotFix! ' r313
@@ -85,7 +89,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
         End If
         
         If field Like "Quant_*" Or field Like "Goszak_*" Then ' HotFix!
-          If GetSheetID(PRE, False) > 0 Then
+        ''  If GetSheetID(PRE, False) > 0 Then ' r317
             Select Case field
               Case Is = "Quant_inbox": field = "AMT_seed" ' r314
               Case Is = "Quant_new": field = "AimAMT"
@@ -95,34 +99,51 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
               Case Is = "Quant_Out": field = "AcceptAMT_gb"
               Case Is = "Goszak_Out": field = "AcceptAMT_gz"
             End Select
-          End If
+        ''  End If ' r317
         End If
         
         ' Если появляется Банк ...
-        If Len(bank) = 2 or Len(bank) = 5 Then ' r313
+        If Len(bank) = 5 Then ' r317
           On Error Resume Next
           '< <<<
           ' ... смотрим, является ли Банк новым И Ссылка не битая
           If Банк_Ключ(Банк_Ключ.Count) <> IIf(Len(bank) = 2, "_", "") & bank Then ' r313
-'            Debug.Print ActiveWorkbook.Name & ": " & bank
-            Банк_N_Строки_заголовка.Add .RefersToRange.Row, bank
+            HookMsg ActiveWorkbook.Name & ": " & bank, vbRetryCancel
+
+            Банк_N1_Записи.Add .RefersToRange.Row + 1, bank ' r317
             ' ЛУЧШЕ проверять по Worksheets.CodeName (ReadOnly),
             ' если структура Книги создаётся с нуля
             Банк_N_Листа.Add GetSheetID(.Value, False), bank
             ' Вписываем новый Банк и имя Листа, на котором он находится
             Банк_Ключ.Add IIf(Len(bank) = 2, "_", "") & bank, bank
             ' Активируем лист, на котором расположен Банк
-            If Worksheets(Банк_N_Листа(bank)).Visible < 0 Then _
+            'If Worksheets(Банк_N_Листа(bank)).Visible < 0 Then _
               Worksheets(Банк_N_Листа(bank)).Activate
           End If
           
           Ref_ID(field).Add .RefersToRange.Column, bank
+          eZ = Банк_N_Листа(bank) ' r317
           '> >>>
           On Error GoTo 0
-        ElseIf bank = "PART" Then ' НЕ ТРЕБУЕТСЯ
+
+        ElseIf bank Like "PART_*" Then ' r317
           On Error Resume Next
           '< <<<
-          If Ref_ID(field).item(PRE & "OT") And Err.Number = 5 Then ' HotFix!
+          If Ref_ID(field).item("OT_OT") And Err.Number = 5 Then ' HotFix!
+            Ref_ID(field).Add .RefersToRange.Column, "BO_SF"
+            Ref_ID(field).Add .RefersToRange.Column, "KF_SF"
+          Else ' after := PRE & "OT"
+            Ref_ID(field).Add .RefersToRange.Column, "BO_SF", "OT_OT"
+            Ref_ID(field).Add .RefersToRange.Column, "KF_SF", "OT_OT"
+          End If
+          '> >>>
+          On Error GoTo 0
+          
+        ElseIf bank Like "*_PART" Then ' r317
+          Stop '' bank = "PART" Then <- ? НЕ ТРЕБУЕТСЯ, как и PRE ' r317
+          On Error Resume Next
+          '< <<<
+          If Ref_ID(field).Item("STAT_OT") And Err.Number = 5 Then ' HotFix! ' r317
             Ref_ID(field).Add .RefersToRange.Column, PRE & "BO"
             Ref_ID(field).Add .RefersToRange.Column, PRE & "KF"
           Else ' after := PRE & "OT"
@@ -131,54 +152,47 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
           End If
           '> >>>
           On Error GoTo 0
-        ElseIf bank = "ARCH" Or bank = "SUPP" Then
-  '        Debug.Print ActiveWorkbook.Name & ": " & field
-          ' Заносятся реквизиты контрагентов...
+          
+        ElseIf bank = "ARCH" Or bank = "SUPP" Then ' r317
+          HookMsg ActiveWorkbook.Name & ": " & field, vbRetryCancel
+
+          ' Внести реквизиты контрагентов
+          If Ref_SUPP.Count = 0 Then Ref_SUPP.Add GetSheetID(.Value, False), "sheet"
           Ref_SUPP.Add .RefersToRange.Column, field
-          ' ... и Номер строки заголовка реквизитов «HEAD»
+          ' Внести номер строки заголовка реквизитов «HEAD» ' r317
           If Not Ref_SUPP Is Nothing And field = "NameS" Then
-            Ref_SUPP.Add GetSheetID(.Value, False), "sheet"
-            Ref_SUPP.Add .RefersToRange.Row, "head"
-            With Worksheets(Ref_SUPP("sheet")) ' Данные контрагентов
-              If .AutoFilterMode Then
-                If .AutoFilter.FilterMode Then .ShowAllData
-                ' https://msdn.microsoft.com/ru-ru/vba/excel-vba
-                '   /articles/range-sort-method-excel
-                '   /articles/xlsortdataoption-enumeration-excel
-                
-                ' Реверс. "Сорт. диапазона" перед внесением "Data" в коллекцию
-                .Cells(Ref_SUPP("head"), Ref_SUPP("NameS")).Sort _
-                  Key1:=.Cells(Ref_SUPP("head"), Ref_SUPP("NameS")), _
-                  Order1:=xlAscending, Key2:=.Cells(Ref_SUPP("head"), _
-                  Ref_SUPP("DateD")), Order2:=xlDescending, Header:=xlYes
-              End If
-              bank = .Cells.SpecialCells(xlLastCell).Row
-              While IsEmpty(.Cells(bank, Ref_SUPP("NameS")))
-                bank = bank - 1
-              Wend: Ref_SUPP.Add .Range(.Cells(Ref_SUPP("head") + 1, 1), _
-                .Cells(bank, .Cells.SpecialCells(xlLastCell).Column)).Value2, _
-                "Data"
+            Ref_SUPP.Add .RefersToRange.Row + 1, "line"
+            
+            With Worksheets(Ref_SUPP("sheet")) ' Данные контрагентов ' r317
+              LastRow = .Cells.SpecialCells(xlCellTypeLastCell).Row
+              Call SortBySheet(Worksheets(.index), Ref_SUPP("DateD"), Ref_SUPP("NameS"))
+              
+              While IsEmpty(.Cells(LastRow, Ref_SUPP("NameS")))
+                LastRow = LastRow - 1
+              Wend
+              Ref_SUPP.Add .Range(.Cells(Ref_SUPP("line"), 1), .Cells(LastRow + 1,  _
+                .Cells.SpecialCells(xlCellTypeLastCell).Column)).Value2, "Data"
             End With
-          End If
+          End If: eZ = Ref_SUPP("sheet") ' r317
         End If
         
         On Error Resume Next
         '< <<<
         ' Если имя диапазона содержит Date*, То применить формат HotFix!
-        If field Like "Date*" Then 'And Not .ProtectContents Then
-          With Worksheets(Банк_N_Листа(bank))
+        With Worksheets(eZ)
+          If field Like "Date*" And IS_DEBUG Then ' And Not .ProtectContents Then
             With .Cells(1, objNamed.RefersToRange.Column).EntireColumn
               .NumberFormat = "m/d/yyyy"
               '.Interior.ColorIndex = 44 ' Отключить при открытии файла для редактирования
             End With
-          End With
-        End If
+          End If
+        End With
         
         If Err.Number = 1004 And Not Len(bank) > 0 Then
           HookMsg "В книге """ & ActiveWorkbook.Name & """ поломан именованный" _
             & " диапазон """ & .Name & """, либо лист защищён от записи. " _
             & vbCr & "Для просмотра связей используйте комбинацию кнопок " _
-            & "Ctrl+F3. ", vbCritical: End ' r314
+            & "Ctrl+F3. ", vbCritical: End
         End If
         '> >>>
         On Error GoTo 0
@@ -187,15 +201,29 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
   Next objNamed: Set objNamed = Nothing
 End Sub
 
-Function GetSupplerRec(ByVal suppName As String, ByVal checkDate As Variant, _
+Public Sub SortBySheet(ByRef Sh As Worksheet, ByVal FirstKey As Byte, _
+  Optional ByVal SecondKey As Byte)
+  Attribute SortBySheet.VB_Description = "r317 ¦ Сортировка через метод листа"
+  
+  If Not Sh.AutoFilterMode Then Sh.Cells(xSUPP("line"), FirstKey).AutoFilter
+  With Sh.AutoFilter.Sort
+    .SortFields.Clear: .Header = xlYes
+    .SortFields.Add Key:=Sh.Cells(xSUPP("line"), FirstKey).Resize(LastRow, 1)
+    If SecondKey > 0 Then _
+      .SortFields.Add Key:=Sh.Cells(xSUPP("line"), SecondKey).Resize(LastRow, 1)
+    .Orientation = xlTopToBottom: .Apply
+  End With
+End Sub
+
+Public Function GetSupplerRec(ByVal suppName As String, ByVal checkDate As Variant, _
   Optional ByVal isForce_SearchSupp As Boolean = False) As Integer
-  Attribute GetSupplerRec.VB_Description = "r316 ¦ Поиск записи контрагента"
+  Attribute GetSupplerRec.VB_Description = "r317 ¦ Поиск записи контрагента"
   Dim tRelevant As Double, aU As Variant, eZ As Byte, nZ As Integer
   
   If IsNumeric(checkDate) And Not IsEmpty(suppName) Then
     If checkDate > 0 Then
-      suppName = Trim(suppName)
-      aU = Sheets(xSUPP("sheet")).Cells(xSUPP("head") + 1, 1) _
+      'suppName = Trim(suppName) ' ВАЖНО! Ещё есть 'лишние пробелы' в Названиях
+      aU = Sheets(xSUPP("sheet")).Cells(xSUPP("line"), 1) _
         .CurrentRegion.Value2: eZ = xSUPP("NameS")
       aU = xSUPP("Data"): eZ = xSUPP("NameS")
       For nZ = LBound(aU, 1) To UBound(aU, 1)
@@ -213,12 +241,13 @@ Function GetSupplerRec(ByVal suppName As String, ByVal checkDate As Variant, _
             
             ' Если требуется найти хотя бы Имя контрагента, То
             ElseIf isForce_SearchSupp _
-            And -aU(nZ, xSUPP("DateD")) >= tRelevant Then
+            And aU(nZ, xSUPP("DateD")) >= tRelevant Then
               tRelevant = -aU(nZ, xSUPP("DateD")): GetSupplerRec = nZ
             End If
           End If
         End If
-      Next nZ: GetSupplerRec = GetSupplerRec + xSUPP("head") - 1
+      Next nZ
+      ' GetSupplerRec = GetSupplerRec + xSUPP("line") - 2 ' ТЕСТ ' r317
     Else
       HookMsg checkDate & " isn't a Date", vbOKCancel
     End If
@@ -245,7 +274,7 @@ Public Function GetRecord(ByRef Ref_Row As Integer, ByVal keyID As String, _
     Worksheets(xID("sheet").item(CodeName)).Cells(Ref_Row, GetRecord).Value2
 End Function
 
-Function GetSheetID(ByVal sheetCodeName As String, _
+Public Function GetSheetID(ByVal sheetCodeName As String, _
   Optional ByRef Ref_isThisBook As Boolean = True) As Byte ' ThisBook - ДА, эта книга
   Attribute GetSheetID.VB_Description = "r314 ¦ Найти индекс листа по CodeName"
   Dim objBook As Workbook, objSheet As Worksheet
@@ -262,20 +291,27 @@ Function GetSheetID(ByVal sheetCodeName As String, _
 End Function
 
 Public Sub HookMsg(ByVal promt As Variant, ByVal style As VbMsgBoxStyle, _
-  Optional title As String)
-  Attribute HookMsg.VB_Description = "r316 ¦ Вывод сообщений в окно 'Immediate' в режиме IS_DEBUG"
+  Optional ByVal title As String)
+  Attribute HookMsg.VB_Description = "r317 ¦ Вывод сообщений в окно 'Immediate' в режиме IS_DEBUG"
+  Dim comma As Variant
+  
   If style > vbRetryCancel And IS_DEBUG Then style = vbRetryCancel
   Select Case style
     Case Is = vbOKCancel
       Debug.Print promt
     Case Is = vbRetryCancel
-      Debug.Print IIf(IS_DEBUG, "[DEBUG MODE] ", ""); promt
+      If IS_DEBUG Then
+        promt = Split(Replace(promt, vbCr, vbTab), vbTab)
+        Debug.Print "[DEBUG MODE] ";: For Each comma In promt
+          Debug.Print comma,: Next comma: Debug.Print ""
+        If Asc(Left(title & "@", 1)) < 48 Then Stop ' isTitle
+      End If
     Case Else
       MsgBox promt, style, IIf(Trip(Len(title)) > 0, title, Application.Name)
   End Select
 End Sub
 
-Public Sub DeleteModulesAndCode(ByRef Ref_Book As Object) ' Удалить модули
+Public Sub DeleteModulesAndCode(ByRef Ref_Book As Object)
   Attribute DeleteModulesAndCode.VB_Description = "r314 ¦ Удалить модули из книги"
   ' Центр управления безопасностью -> Параметры макросов -> Доверять доступ к VBA
   Dim objProjectComponents As Object, objElement As Object

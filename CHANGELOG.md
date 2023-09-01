@@ -1,4 +1,12 @@
-### [2023.08.10-alpha]
+### [2023.09.11-alpha](../../commit)
+ > * Fix *style* `vbRetryCancel` in *sub* `HookMsg`
+ > * Fix *sub* `GetBanks` **включена функция сортировки** `SortBySheet`
+ > * Fix *sub* `Shell_Sort` **переработано**
+ - Add *object* `LastRow` && Remove *object* `PRE`
+ - Add *formType* `dtDateMonth` in *sub* `Auto_Open`
+ - Add *sub* `SortBySheet` **Сортировка через метод листа**
+
+### [2023.08.10-alpha](../../commit/0f577eec)
  > * Fix *sub* `Shell_Sort` **переработано**
  > * Fix *sub* `GetWorkbooks` **переработано**
  > * Fix *sub* `Main_Sub` **переработано**
@@ -10,10 +18,8 @@
  * Fix *sub* `Auto_Open` **добавлена проверка выбранных книг по критериям отбора**
  - Add *const* `IS_DEBUG` **Режим отладки для сообщений**
  - Add *sub* `HookMsg` **Вывод сообщений в окно *Immediate* в режиме отладки; заменяет `MsgBox`**
- 
-[2023.08.10-alpha]: ../../
 
-### [2023.07.9-alpha]
+### [2023.07.9-alpha](../../commit/58120f73)
  > * Fix *sub* `Auto_Open` **переработан массив директорий `Paths`**
  > * Fix *function* `NumberFormatterRU` **переработано** && Rename *variable* ~`InWords`~ to `isNumberText`
  - Add *sub* `GetForm_DialogElements` **добавлены формы выбора интервалов: квартал и полугодие**
@@ -21,9 +27,7 @@
  - Add *sub* `Ribbon_GetVisibleMenu` **событие впереключение видимости объектов пользовательского меню**
  - Add *sub* `Ribbon_Initialize` **событие отрисовки пользовательского меню**
 
-[2023.07.9-alpha]: ../../commit/58120f73
-
-### [2023.07.8-beta]
+### [2023.07.8-beta](../../commit/1bf8d574)
  > * Rename *objects*
  > * Fix *Enum* `DialogType` **переработано**
  > * Fix *sub* `Shell_Sort` **переработано**
@@ -43,9 +47,7 @@
  - Add *const* `WORKBOOKS_FILTER` **выбор определённых имён файлов, разделитель `$`**
  * Fix *function* `Taxpayer_Number_CRC` **исправлена ошибка**
 
-[2023.07.8-beta]: ../../commit/1bf8d574
-
-### [2020.07.7-alpha]
+### [2020.07.7-alpha](../../commit/45fb4c25)
  > * Fix *sub* `NumeralRU` **исправлена ошибка подсчёта `secondDigit`**
  > * Fix *function* `GetSupplerRec` **исправлена ошибка**
  > * Fix *function* `GetRecord` **переработано**
@@ -60,8 +62,6 @@
  - Add *function* `FindRegions` **Стеммер: поиск 'региона r2'**
  - Add *function* `isVowel` **гласная буква**
 
-[2020.07.7-alpha]: ../../commit/45fb4c25
-
 ### [2020.04.6-alpha] \[num-formatter\]
  - Add *object* `WordForm` as *collection* **список существительных в категории чисел**
  - Add *function* `NumberFormatterRU` **возвращает множественное количество (слово из списка)**
@@ -69,7 +69,7 @@
 
 [2020.04.6-alpha]: ../../compare/9a7fac4a...num-formatter
 
-### [2020.04.5-alpha]
+### [2020.04.5-alpha](../../commit/9a7fac4a)
  > * Rename *object* ~`DialogBox`~ to `objDialogBox`
  > * Fix *function* `GetSupplerRec` **переработано, изменён параметр `IsSelectSupp_Forced = False` (достаточно найти имя)**
  > * Fix *sub* `Shell_Sort` **переработано**
@@ -86,11 +86,9 @@
  * Fix *function* `GetUserName` **добавлен параметр `SetUserDomain`**
  * Fix *sub* `Auto_Open` **проверка значения `CRC_HOST = 0` если книга не отчёт**
 
-[2020.04.5-alpha]: ../../commit/9a7fac4a
-
 # 
 
-### [2019.10.4-alpha]
+### [2019.10.4-alpha](../../commit/96cc161f)
  > * Rename *sub* ~`RecLog`~ to `WriteLog`
  > * Rename && Fix *sub* ~`SettingsBankID`~ to `GetBanks` **запись списка контрагентов в коллекцию `xSUPP`**
  > * Rename *object* ~`BankID`~ to `xID`
@@ -116,17 +114,13 @@
  >     * Fix *function* `FileUnlocked` **помарки**
  >     * Fix *sub* `DeleteModulesAndCode` **помарки**
 
-[2019.10.4-alpha]: ../../commit/96cc161f
-
 # 
 
-### [2018.08.3-alpha]
+### [2018.08.3-alpha](../../commit/9f422069)
  > * Rename *function* ~`FindSheet`~ and parameters to `GetSheetID`
  > * Rename *sub* ~`Record_Log`~ to `RecLog`
 
-[2018.08.3-alpha]: ../../commit/9f422069
-
-### [2018.07.2-alpha]
+### [2018.07.2-alpha](../../commit/9a2087e4)
  > * Rename *function* ~`GetSheetIndex`~ and parameters to `FindSheet`
  > * Fix *function* `ClearSpacesInText` **переработано**
  > * Fix *sub* `Auto_Open` **подготовка данных о книгах**
@@ -146,8 +140,6 @@
  - Add *object* `BankSUPP` as *collection*
  - Add *sub* `GetWorkbooks` **запись найденных книг в коллекцию `DirName`**
 
-[2018.07.2-alpha]: ../../commit/9a2087e4
-
 # 
 
 ### [2015.10.1-alpha] \[dev-heavy-old\]
@@ -159,4 +151,3 @@
 
 [2015.10.1-alpha]: ../../../StatsOKM/compare/e784ad25...dev
 
-# 

@@ -20,14 +20,14 @@ End Enum
 
 Private objDialogBox As DialogSheet
 
-Function GetUserName(Optional ByVal setUserDomain = False) As String
+Public Function GetUserName(Optional ByVal setUserDomain = False) As String
   Attribute GetUserName.VB_Description = "r314 ¦ Получить имя текущей учётной записи"
   GetUserName = IIf(setUserDomain, Environ("UserDomain") & "\", "") _
     & Environ("UserName")
 End Function
 
 Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
-  Attribute Auto_Open.VB_Description = "r316 ¦ Автозапуск"
+  Attribute Auto_Open.VB_Description = "r317 ¦ Автозапуск"
   Dim max As Integer, modulo As Integer, item As Variant, Paths() As Variant
   Const HOST As String = "#Finansist\YCHET\"
   
@@ -73,7 +73,8 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
   '-> NEXT
   
   If Not Paths(LBound(Paths)) Then ActiveWorkbook.Saved = True Else _
-    If Not IsEmpty(Paths(2)) Then Main_Sub Paths(3), Paths(2)
+    If Not IsEmpty(Paths(2)) Then If IS_DEBUG Then Application _
+      .VBE.MainWindow.Visible = False Else Main_Sub Paths(3), Paths(2) ' r317
 End Sub
 
 Static Sub DialogButtons_Click()
@@ -93,7 +94,7 @@ End Sub
 
 Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
   ByRef Ref_Lbls As Variant)
-  Attribute GetForm_DialogElements.VB_Description = "r315 ¦ Создание диалогового окна"
+  Attribute GetForm_DialogElements.VB_Description = "r317 ¦ Создание диалогового окна"
   Const PIXEL As Single = 5.25 ' Lbls: 1= Files, 2= Dirs, 3= Text, 4= Title
   
   Application.DisplayAlerts = False
@@ -145,8 +146,34 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
           End If
         End With
         
-      Case Is = dtDateMonth ' МЕСЯЦ ' r315
-        Stop
+      Case Is = dtDateMonth ' МЕСЯЦ ' r317
+        With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
+          .text = "Выберите месяц: "
+        End With
+        With .DropDowns.Add(PIXEL * 36, PIXEL * 8, PIXEL * 12, PIXEL * 3)
+          .Name = "MonthNum"
+          .DropDownLines = 12
+          .AddItem "Январь"
+          .AddItem "Февраль"
+          .AddItem "Март"
+          .AddItem "Апрель"
+          .AddItem "Май"
+          .AddItem "Июнь"
+          .AddItem "Июль"
+          .AddItem "Август"
+          .AddItem "Сентябрь"
+          .AddItem "Октябрь"
+          .AddItem "Ноябрь"
+          .AddItem "Декабрь"
+          .Value = IIf(Month(Date) = 1, 12, Month(Date) - 1)
+        End With
+        With .Labels.Add(PIXEL * 15, PIXEL * 12, PIXEL * 20, PIXEL * 3)
+          .text = "Введите год: "
+        End With
+        With .EditBoxes.Add(PIXEL * 36, PIXEL * 12, PIXEL * 12, PIXEL * 3)
+          .Name = "MonthYear"
+          .text = IIf(Month(Date) > 1, Year(Date), Year(Date) - 1)
+        End With
         
       Case Is = dtDateQuarter ' КВАРТАЛ ' r315
         With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
@@ -214,8 +241,11 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
           Ref_Lbls(2) = CDate(.EditBoxes("DateEnd").text)
           Ref_Lbls(3) = CDate(.EditBoxes("DateBegin").text)
 
-        Case Is = dtDateMonth ' МЕСЯЦ
-          Stop
+        Case Is = dtDateMonth ' МЕСЯЦ ' r317
+          Ref_Lbls(2) = DateSerial(.EditBoxes("MonthYear").text, _
+            .DropDowns("MonthNum").Value + 1, 0)
+          Ref_Lbls(3) = DateSerial(.EditBoxes("MonthYear").text, _
+            .DropDowns("MonthNum").Value, 1)
 
         Case Is = dtDateQuarter ' КВАРТАЛ
           Ref_Lbls(2) = DateSerial(.EditBoxes("QuarterYear").text, _
@@ -315,7 +345,7 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
     If Err.Number = 5 Or Err.Number = 53 Or Err.Number >= 75 Then End
 End Sub
 
-Function Taxpayer_Number_CRC(ByVal ITN12orTIN10 As Double) As Boolean
+Public Function Taxpayer_Number_CRC(ByVal ITN12orTIN10 As Double) As Boolean
   Attribute Taxpayer_Number_CRC.VB_Description = "r314 ¦ Проверка контрольной суммы ИНН"
   Attribute Taxpayer_Number_CRC.VB_ProcData.VB_Invoke_Func = " \n9"
   Dim CodeLen(11) As Byte, eZ As Byte, mZ As Integer, nZ As Integer
@@ -343,7 +373,7 @@ Function Taxpayer_Number_CRC(ByVal ITN12orTIN10 As Double) As Boolean
     Taxpayer_Number_CRC = False
 End Function
 
-Function ChoiceCategory(ByVal currentRow As Integer) As Byte
+Public Function ChoiceCategory(ByVal currentRow As Integer) As Byte
   Attribute ChoiceCategory.VB_Description = "r314 ¦ Матрица"
   Dim Category(16) As String, eZ As Byte
   
@@ -425,7 +455,7 @@ Private Sub WriteLog(ByVal logDir As String, ByVal accessMode As String)
   End With
 End Sub
 
-Function FileUnlocked(ByRef Ref_FileName As String) As Boolean
+Public Function FileUnlocked(ByRef Ref_FileName As String) As Boolean
   Attribute FileUnlocked.VB_Description = "r314 ¦ Проверить занятость файла"
   On Error Resume Next
     '< <<<

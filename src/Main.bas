@@ -28,7 +28,7 @@ Static Sub Main_Sub(ByVal dateBegin As Date, ByVal dateEnd As Variant)
   ' Создаём динамический двумерный массив для выгрузки данных
   'ReDim Table(1, 1) As Variant
   
-  GetBanks xID, xSUPP
+  Call (GetBanks xID, xSUPP)
   If xID("key").Count = 0 Then HookMsg Format(Timer - tBegin, "0.000 с:") & _
     "ОШИБКА! Ни один Банк не найден!", vbRetryCancel: _
     Application.Cursor = xlDefault: End ' HotFix!

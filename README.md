@@ -56,10 +56,37 @@
    	"editor.tabSize": 2,
    	"files.autoGuessEncoding": true,
    	"files.encoding": "windows1251",
+   	"files.eol": "\r\n",
    	"files.insertFinalNewline": true
    },
    ```
 
-[клиентский хук]: //gist.github.com/c55f1538454755fdff71fba0d686e371
+[клиентский хук]: https://gist.github.com/c55f1538454755fdff71fba0d686e371
 
-# 
+<details>
+    <summary><a name="shell-sort-gap"><img src="https://github.com/twbs/icons/blob/main/icons/table.svg?raw=true" type="image/svg+xml" alt="table" align="left" width="28" height="28"/></a> Интервалы для сортировки методом Шелла Дональда</summary><br />
+  
+   |OEIS|Name Gap|Complexity[^1]|Formula|&fnof;(k)
+   |:------- | ---:|:---:|:--- |:--- 
+   |[A102549]|Ciura 2001|Un­known| |`={ 1750; 701; 301; 132; 57; 23; 10; 4; 1 }`
+   |[A108870]|Tokuda 1992|Un­known| |`=ОКРУГЛВВЕРХ(( 9*(9/4)^A4 -4 )/5;0)`
+   |[A033622]|Sedgewick 1986|$\theta( N^\frac{4}{3} )$|`=ЕСЛИ( ЕНЕЧЁТ(k); 8*2^k -6*2^( (k+1)/2 ); 9*2^k -9*2^(k/2) ) +1`|`=( 9-ОСТАТ(k;2) )*2^k -( 9-3*ОСТАТ(k;2) )*2^ОКРУГЛВВЕРХ(k/2;0) +1`
+   |[A055875]|Knuth 1973|$\theta( N^\frac{3}{2} )$| |`=( 3^k -1 )/2`
+   |[A003586]|Pratt 1971|$\theta( N \times lg^2 (N) )$|$\sum \limits_{k=1}^{N/_2} 2^k \times 3^k$|` `
+   |[A033547]|Shell 1959|$\theta( N^2 )$ &Theta; ( N&sup2; )| |`=ОКРУГЛВНИЗ(N/2^k;0)`
+
+   > :warning: 
+   > Последовательности со степенями числа 2 уменьшают эффективность сортировки.  
+
+   [^1]: **Complexity** - Worst-case time complexity.
+</details>
+
+[Shellsort]: https://en.wikipedia.org/wiki/Shellsort
+[сортировка]: https://neerc.ifmo.ru/wiki/index.php?title=Сортировки
+[A102549]: https://oeis.org/A102549
+[A108870]: https://oeis.org/A108870
+[A033622]: https://oeis.org/A033622
+[A055875]: https://oeis.org/A055875
+[A003586]: https://oeis.org/A003586
+[A033547]: https://oeis.org/A033547
+

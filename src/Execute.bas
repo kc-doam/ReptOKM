@@ -4,27 +4,27 @@ Option Base 1
 '123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
 Public Sub Shell_Sort(ByRef Ref_Items As Variant, ByVal getColumn As Byte)
-  Attribute Shell_Sort.VB_Description = "r316 ¦ Сортировка методом Шелла"
-  ' Сортировка методом Шелла Дональда с интервалами длин ЭМ Марцина Циура
+  Attribute Shell_Sort.VB_Description = "r317 ¦ Сортировка методом Шелла"
+  ' Сортировка методом Шелла Дональда с интервалами длин https://oeis.org/A036569
   ' http://ru.wikibooks.org/wiki/Примеры_реализации_сортировки_Шелла#VBA
-  Dim cnt As Integer, gap As Integer, pos As Integer, inv_a108870 As Variant
+  Dim cnt As Integer, gap As Integer, pos As Integer, inv_a036569 As Variant
   Dim kZ As Integer, mZ As Integer, nZ As Integer
   
   ReDim tmp(UBound(Ref_Items, 1)) As Variant
   mZ = LBound(Ref_Items, 2) ' Нижняя граница массива
   nZ = UBound(Ref_Items, 2)
   If nZ > mZ Then ' Если в массиве одна запись, То нет смысла сортировать
-    ' Инвертированная эмпирическая последовательность Марцина Циура
-    inv_a108870 = Array(776591, 345152, 153401, 68178, 30301, 13467, _
-      5985, 2660, 1182, 525, 233, 103, 46, 20, 9, 4, 1)
+    ' Инвертированная эмпирическая последовательность Дональда Кнута
+    inv_a036569 = Array(1391376, 463792, 198768, 86961, 33936, 13776, 
+      4592, 1968, 861, 336, 112, 48, 21, 7, 3, 1)
     kZ = nZ - mZ + 1 ' Количество записей в массиве
-    nZ = LBound(inv_a108870) - 1 ' Счётчик последовательности Марцина Циура
+    nZ = LBound(inv_a036569) - 1 ' Счётчик последовательности Дональда Эрвина Кнута
     Do
       nZ = nZ + 1
-      gap = inv_a108870(nZ) ' Наименьший интервал
+      gap = inv_a036569(nZ) ' Наименьший интервал
     Loop Until kZ > gap ' Цикл ДО
     Do
-      gap = inv_a108870(nZ) ' Интервал
+      gap = inv_a036569(nZ) ' Интервал
       For cnt = (gap + mZ) To UBound(Ref_Items, 2)
         pos = cnt
         For kZ = LBound(Ref_Items, 1) To UBound(Ref_Items, 1)
@@ -42,11 +42,11 @@ Public Sub Shell_Sort(ByRef Ref_Items As Variant, ByVal getColumn As Byte)
       nZ = nZ + 1
     Loop Until gap = 1 ' Цикл ДО
   Else
-  '  HookMsg "Shell_Sort: В массиве ОДНА или НУЛЬ записей", vbOKCancel
+    HookMsg "Shell_Sort: В массиве ОДНА или НУЛЬ записей", vbRetryCancel, "@"
   End If
 End Sub
 
-Function GetQuarterNumber(ByVal getDate As Date, _
+Public Function GetQuarterNumber(ByVal getDate As Date, _
   Optional ByVal getYear As Boolean = False) As String ' Номер квартала
   Attribute GetQuarterNumber.VB_Description = "r314 ¦ Заменить цифру на номер квартала"
   Attribute GetQuarterNumber.VB_ProcData.VB_Invoke_Func = " \n2"
@@ -58,7 +58,7 @@ Function GetQuarterNumber(ByVal getDate As Date, _
   If getYear Then GetQuarterNumber = GetQuarterNumber & Year(getDate) & " г."
 End Function
 
-Function Trip(ByVal text As String) As String
+Public Function Trip(ByVal text As String) As String
   Attribute Trip.VB_Description = "r314 ¦ Убрать перед/после текста (неразрывные) пробелы и переносы строк"
   Const LF0 As String = "[" & vbLf & " ]*", LF8 As String = "*[" & vbLf & " ]"
   
@@ -68,7 +68,7 @@ Function Trip(ByVal text As String) As String
   Wend: Trip = text
 End Function
 
-Function Tripp(ByVal item_notRange As Variant) As Variant
+Public Function Tripp(ByVal item_notRange As Variant) As Variant
   Attribute Tripp.VB_Description = "r314 ¦ Функция удаления разрывов строк по краям"
   Const NL0 As String = "[" & vbCrLf & " ]*", LF0 As String = "[" & vbLf & " ]*"
   Const NL8 As String = "*[" & vbCrLf & " ]", LF8 As String = "*[" & vbLf & " ]"
@@ -85,7 +85,7 @@ Function Tripp(ByVal item_notRange As Variant) As Variant
 End Function
 
 
-Function ClearSpacesInText(ByVal text As String) As String
+Public Function ClearSpacesInText(ByVal text As String) As String
   Attribute ClearSpacesInText.VB_Description = "r314 ¦ Удалить опечатки и лишние пробелы"
   text = Replace(text, Chr(160), " ")       ' Убрать: неразрывный пробел
   ''text = Replace(text, ".", ". ") ' Ошибка при проверке "т.ч."
