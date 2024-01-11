@@ -3,7 +3,7 @@ Option Explicit
 Option Base 1
 '123456789012345678901234567890123456h8nor@уа56789012345678901234567890123456789
 
-Public Const WORKBOOKS_FILTER$ = "*", CRC_HOST% = 256, REV% = &H13A
+Public Const WORKBOOKS_FILTER$ = "*", CRC_HOST% = 256, REV% = &H13E
 Public Const IS_DEBUG = False, PERSON_LIST = "Ф/Л,Ю/Л" ' Не менять! "*/Л,Ф/Л,Ю/Л"
 
 ' Коллекции: ключи коллекции xID, рабочие листы и колонки
@@ -13,16 +13,16 @@ Public xSUPP As New Collection
 ' Константы модуля
 Private Const QT As String = ": Количество "
 ' Динамический массив для сбора данных
-Private Table() As Variant
+Private xTable() As Variant
 
 Static Sub Main_Sub(ByVal dateBegin As Date, ByVal dateEnd As Variant)
-  Attribute Main_Sub.VB_Description = "r316 ¦ Сбор данных"
+  Attribute Main_Sub.VB_Description = "r318 ¦ Сбор данных"
   Dim tBegin As Double, eZ As Byte, nZ As Integer
   
   With Application
     .ReferenceStyle = xlA1 ' Абсолютные ссылки
     .ScreenUpdating = False: .EnableEvents = False
-    .Calculation = xlCalculationManual
+    If IS_DEBUG Then .Calculation = xlCalculationManual ' r318
   End With: tBegin = Timer
   
   ' Создаём динамический двумерный массив для выгрузки данных

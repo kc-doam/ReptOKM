@@ -13,9 +13,10 @@ Public Manager As New Collection
 
 Private Enum DialogType
   dtDateRange = 0
-  dtDateMonth = 1
-  dtDateQuarter = 2
-  dtDateSemester = 3 ' r314
+  dtDateNow = 1
+  dtDateMonth = 2
+  dtDateQuarter = 4
+  dtDateSemester = 8
 End Enum
 
 Private objDialogBox As DialogSheet
@@ -26,9 +27,9 @@ Public Function GetUserName(Optional ByVal setUserDomain = False) As String
     & Environ("UserName")
 End Function
 
-Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
-  Attribute Auto_Open.VB_Description = "r317 ¦ Автозапуск"
-  Dim max As Integer, modulo As Integer, item As Variant, Paths() As Variant
+Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (node - 1) )
+  Attribute Auto_Open.VB_Description = "r318 ¦ Автозапуск"
+  Dim max As Integer, modulo As Integer, node As Variant, Paths() As Variant
   Const HOST As String = "#Finansist\YCHET\"
   
   With ActiveWindow
@@ -44,49 +45,49 @@ Private Sub Auto_Open() ' book.onLoad - Подсчёт CRC_HOST = SUM( 2 ^ (item
     HOST & "Рецензирование ИБ Финансист\", HOST & "ИБ Юридическая пресса\", _
     HOST & "Азбука \", HOST & UCase("Перезакупка\"), HOST) ' r315
   
-  ' Подсчёт CRC_HOST = SUM( 2 ^ (item - 1) )
+  ' Подсчёт CRC_HOST = SUM( 2 ^ (node - 1) )
   If CRC_HOST > 2 ^ UBound(Paths) Then _
     HookMsg "CRC_HOST Error", vbCritical: Exit Sub
   max = CRC_HOST Mod 2 ^ UBound(Paths) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N+1]
   
-  For item = UBound(Paths) To 2 Step -1
-    modulo = CRC_HOST Mod 2 ^ (item - 1) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N]
+  For node = UBound(Paths) To 2 Step -1
+    modulo = CRC_HOST Mod 2 ^ (node - 1) ' КОНТРОЛЬНОЕ_ЧИСЛО % 2^[N]
     ' Если ТЕКУЩИЙ остаток <= ПРЕДЫДУЩИЙ остаток, То исключить каталог
-    If max <= modulo Then Paths(item) = Empty
+    If max <= modulo Then Paths(node) = Empty
     max = modulo
-    If Len(Paths(item)) > 0 Then
-      Call GetWorkbooks(Paths(item))
-      If Right(Paths(item), 1) = Chr(&H5C) Then Paths(1) = Paths(1) + 1
+    If Len(Paths(node)) > 0 Then
+      Call GetWorkbooks(Paths(node))
+      If Right(Paths(node), 1) = Chr(&H5C) Then Paths(1) = Paths(1) + 1
     End If
-  Next item: max = Paths(1): Paths(1) = Empty ' HotFix!
+  Next node: max = Paths(1): Paths(1) = Empty ' HotFix!
   If CRC_HOST > 0 Then Paths = Array(String(2, vbCr), Replace(Join(Paths), _
     "\ ", "\" & vbLf), "Сформировать отчёт по файлам в каталогах? ", _
     " (каталоги: " & max & ", файлы: " & FileName.Count & ")") ' ИНФО сообщение
   For modulo = 1 To FileName.Count
-    For Each item In Workbooks ' Проверка: закрыть все книги
-      If item.Name = FileName(modulo) Then HookMsg "Необходимо закрыть файл """ _
-        & FileName(modulo) & """", vbCritical: item = vbNo: Exit Sub
-    Next item: Paths(1) = Paths(1) & FileName(modulo) & vbCr
+    For Each node In Workbooks ' Проверка: закрыть все книги
+      If node.Name = FileName(modulo) Then HookMsg "Необходимо закрыть файл """ _
+        & FileName(modulo) & """", vbCritical: node = vbNo: Exit Sub
+    Next node: Paths(1) = Paths(1) & FileName(modulo) & vbCr
   Next modulo: If max = 0 Then Paths = Array(True, Date, Empty, Paths(4))
   If FileName.Count > 0 Then GetForm_DialogElements dtDateRange, Paths _
     Else HookMsg "ОШИБКА! Нет книг по критерием отбора", vbRetryCancel  
   '-> NEXT
   
   If Not Paths(LBound(Paths)) Then ActiveWorkbook.Saved = True Else _
-    If Not IsEmpty(Paths(2)) Then If IS_DEBUG Then Application _
-      .VBE.MainWindow.Visible = False Else Main_Sub Paths(3), Paths(2) ' r317
+    If Not IsEmpty(Paths(2)) Then Main_Sub Paths(3), Paths(2) ' r316
 End Sub
 
 Static Sub DialogButtons_Click()
-  Attribute DialogButtons_Click.VB_Description = "r310 ¦ События кнопок диалогового окна"
-  Dim item As Variant, str As String: str = Empty
+  Attribute DialogButtons_Click.VB_Description = "r318 ¦ События кнопок диалогового окна"
+  Dim node As Variant, str As String: str = Empty
   
   If objDialogBox Is Nothing Then Exit Sub ' HotFix!
   With objDialogBox
     Select Case .Buttons(Application.Caller).Index
       Case Is = 1
-        For Each item In FileName: str = str & vbCr & item: Next item: MsgBox _
+        For Each node In FileName: str = str & vbCr & node: Next node: HookMsg _
           "Список файлов для формирования отчёта: " & vbCr & str, vbInformation
+        If IS_DEBUG Then Application.VBE.MainWindow.Visible = True
       Case Is = 3: .Visible = xlSheetVisible ' IsChanged = -1
     End Select
   End With
@@ -94,7 +95,7 @@ End Sub
 
 Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
   ByRef Ref_Lbls As Variant)
-  Attribute GetForm_DialogElements.VB_Description = "r317 ¦ Создание диалогового окна"
+  Attribute GetForm_DialogElements.VB_Description = "r318 ¦ Создание диалогового окна"
   Const PIXEL As Single = 5.25 ' Lbls: 1= Files, 2= Dirs, 3= Text, 4= Title
   
   Application.DisplayAlerts = False
@@ -146,7 +147,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
           End If
         End With
         
-      Case Is = dtDateMonth ' МЕСЯЦ ' r317
+      Case Is = dtDateMonth, dtDateNow ' МЕСЯЦ ' r318
         With .Labels.Add(PIXEL * 15, PIXEL * 8, PIXEL * 20, PIXEL * 3)
           .text = "Выберите месяц: "
         End With
@@ -166,6 +167,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
           .AddItem "Ноябрь"
           .AddItem "Декабрь"
           .Value = IIf(Month(Date) = 1, 12, Month(Date) - 1)
+          If formType = dtDateNow Then .Enabled = False ' r318
         End With
         With .Labels.Add(PIXEL * 15, PIXEL * 12, PIXEL * 20, PIXEL * 3)
           .text = "Введите год: "
@@ -173,6 +175,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
         With .EditBoxes.Add(PIXEL * 36, PIXEL * 12, PIXEL * 12, PIXEL * 3)
           .Name = "MonthYear"
           .text = IIf(Month(Date) > 1, Year(Date), Year(Date) - 1)
+          If formType = dtDateNow Then .Enabled = False ' r318
         End With
         
       Case Is = dtDateQuarter ' КВАРТАЛ ' r315
@@ -241,7 +244,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
           Ref_Lbls(2) = CDate(.EditBoxes("DateEnd").text)
           Ref_Lbls(3) = CDate(.EditBoxes("DateBegin").text)
 
-        Case Is = dtDateMonth ' МЕСЯЦ ' r317
+        Case Is = dtDateMonth, dtDateNow ' МЕСЯЦ ' r318
           Ref_Lbls(2) = DateSerial(.EditBoxes("MonthYear").text, _
             .DropDowns("MonthNum").Value + 1, 0)
           Ref_Lbls(3) = DateSerial(.EditBoxes("MonthYear").text, _
@@ -269,7 +272,7 @@ Private Sub GetForm_DialogElements(ByVal formType As DialogType, _
 End Sub
 
 Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
-  Attribute GetWorkbooks.VB_Description = "r316 ¦ Запись найденных баз/статистик в коллекцию"
+  Attribute GetWorkbooks.VB_Description = "r318 ¦ Запись найденных баз/статистик в коллекцию"
   Dim strName As String, Item As Variant: pathName = GetMainPath & pathName
   Const HOST As String = "*Finansist\YCHET\"
   
@@ -333,9 +336,10 @@ Private Sub GetWorkbooks(ByVal pathName As String) ' Все статистики
   Exit Sub
   
   ErrDir:
-    'If Err.Number = 76 Then pathName = ActiveWorkbook.Path & "\": Resume Next ' TEST ' r314
+    'If Err.Number = 76 Then pathName = ActiveWorkbook.Path & "\": Resume Next ' TEST "Путь не найден" ' r314
     If Not strName Like "*\*.xl*" And Err.Number = 53 Then Err.Number = 75
     Select Case Err.Number
+    '  Case Is = 50: strName = "Нет прав или файл открыт другим процессом: " ' r317
       Case Is = 53: strName = "Файл не найден: "
       Case Is = 75: strName = "Нет доступа к файлу: "
       Case Is = 457: Exit Sub
@@ -404,7 +408,7 @@ Public Function ChoiceCategory(ByVal currentRow As Integer) As Byte
     ElseIf .Cells(currentRow, xSUPP("Org_base")) > 0 And .Cells(currentRow, _
       xSUPP("Org_base")) < 999 Then ' Если «Источник» = [Номер РИЦ]
       If UCase(.Cells(currentRow, xSUPP("Org_town"))) Like "М*ВА" Then
-        ChoiceCategory = 13 ' k = 6
+        ChoiceCategory = 13 ' Index = 6
       ElseIf UCase(.Cells(currentRow, xSUPP("Org_town"))) Like "С*РГ" Then
         ChoiceCategory = 14
       Else
@@ -414,11 +418,11 @@ Public Function ChoiceCategory(ByVal currentRow As Integer) As Byte
     ElseIf UCase(.Cells(currentRow, xSUPP("NameL"))) Like Category(12) Then
       ChoiceCategory = 12
     Else ' Если совпадения не найдутся, То посчитать в «Коммерч.»
-      ChoiceCategory = 11 ' k = 5
+      ChoiceCategory = 11 ' Index = 5
       For eZ = LBound(Category) To UBound(Category)
         If UCase(.Cells(currentRow, xSUPP("Org_type"))) Like Category(eZ) And _
         Not UCase(.Cells(currentRow, xSUPP("Org_type"))) Like "*БЕЗ ПОДП*" Then
-          ChoiceCategory = eZ: Exit For ' k = 4, 5, 7
+          ChoiceCategory = eZ: Exit For ' Index = 4, 5, 7
         End If
       Next eZ
     End If
@@ -458,8 +462,9 @@ End Sub
 Public Function FileUnlocked(ByRef Ref_FileName As String) As Boolean
   Attribute FileUnlocked.VB_Description = "r314 ¦ Проверить занятость файла"
   On Error Resume Next
-    '< <<<
-    Open Ref_FileName For Binary Access Read Write Lock Read Write As #1
-    Close #1
-    If Err.Number <> 0 Then FileUnlocked = True: Err.Clear
+  '< <<<
+  Open Ref_FileName For Binary Access Read Write Lock Read Write As #1
+  Close #1
+  If Err.Number <> 0 Then FileUnlocked = True: Err.Clear
+  '> >>>
 End Function

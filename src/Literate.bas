@@ -26,13 +26,13 @@ End Enum
 
 Private Gaps() As String, WordForm As New Collection
 
-Public Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As WordFormType, _
+Public Function NumberFormatterRU(ByVal tNumber As Double, ByRef Ref_Item As WordFormType, _
   Optional ByVal isNumberText As Boolean = False) As String '> Число в слово
-  Attribute NumberFormatterRU.VB_Description = "r317 ¦ Количество существительного (из списка)"
+  Attribute NumberFormatterRU.VB_Description = "r318 ¦ Количество существительного (из списка)"
   Attribute NumberFormatterRU.VB_ProcData.VB_Invoke_Func = " \n7"
   '' "Один", "Два", "Шесть" Именительный падеж (есть что?)
   '' "Одного", "Двух", "Шести" Родительный падеж (нет чего?)
-  Dim colCount As WordFormType, teenage As Boolean, aU As Variant, eZ As Byte
+  Dim colCount As WordFormType, teenage As Boolean, node As Variant, eZ As Byte
   
   If WordForm.Count = 0 Then
     WordForm.Add [{" тонна", " тонны", " тонн"}], CStr(wtAsTonne)
@@ -40,7 +40,7 @@ Public Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As Word
     WordForm.Add [{" минута", " минуты", " минут"}], CStr(wtAsMinute) ' Time
     WordForm.Add [{" секунда", " секунды", " секунд"}], CStr(wtAsSecond) ' Time
     WordForm.Add [{"", "", ""}], CStr(wtAsNone) ' HotFix!
-    '         "One", "Few", "Many"; Для дробных «number» нужно применять "Few"
+    '         "One", "Few", "Many"; Для дробных «tNumber» нужно применять "Few"
     WordForm.Add [{" тысяча", " тысячи", " тысяч"}], CStr(wtInThousands)
     WordForm.Add [{" миллион", " миллиона", " миллионов"}], CStr(wtInMills)
     WordForm.Add [{" миллиард", " миллиарда", " миллиардов"}], CStr(wtInBills)
@@ -57,34 +57,34 @@ Public Function NumberFormatterRU(ByVal number As Double, ByRef Ref_Item As Word
     WordForm.Add [{" Материал", " Материала", " Материалов"}], CStr(wtAsMaterial)
   End If
   
-  colCount = (Len(CStr(number)) + 2) \ 3 - 1 ' Число разрядов если isNumberText
+  colCount = (Len(CStr(tNumber)) + 2) \ 3 - 1 ' Число разрядов если isNumberText
   If Not (isNumberText Xor colCount = 0) Then colCount = Ref_Item ' Warn!
   ' Разбить число на разряды по 3 цифры
-  Gaps = Split(Format(number, IIf(isNumberText, "0,00", "0")), Chr(160))
+  Gaps = Split(Format(tNumber, IIf(isNumberText, "0,00", "0")), Chr(160))
   
   ' Item < UnitTyte.MinIndex Xor Item >= WordForm.Count + UnitTyte.MinIndex
   If Ref_Item < wtAsTonne Xor Ref_Item >= WordForm.Count + wtAsTonne Then ' HotFix!
     HookMsg "Ошибка ввода: Не найден WordForm с ключом WordFormType#" & Ref_Item, vbOKCancel
-    NumberFormatterRU = number
+    NumberFormatterRU = tNumber
   Else
-    For Each aU In Gaps
-      teenage = (aU Mod 100) >= 11 And (aU Mod 100) < 20 ' Им.падеж, Мн.число
+    For Each node In Gaps
+      teenage = (node Mod 100) >= 11 And (node Mod 100) < 20 ' Им.падеж, Мн.число
       
-      Select Case -(Not teenage) * aU Mod 10 ' Warn!
-        Case Is = 1: aU = 1 ' "One"
-        Case 2 To 4: aU = 2 ' "Few"
-        Case Else: aU = 3 ' "Many"
+      Select Case -(Not teenage) * node Mod 10 ' Warn!
+        Case Is = 1: node = 1 ' "One"
+        Case 2 To 4: node = 2 ' "Few"
+        Case Else: node = 3 ' "Many"
       End Select
       
       If isNumberText Then
-        Gaps(eZ) = NumeralRU(CInt(Gaps(eZ)), colCount, CByte(aU)) _
-          & WordForm(CStr(colCount))(aU)
+        Gaps(eZ) = NumeralRU(CInt(Gaps(eZ)), colCount, CByte(node)) _
+          & WordForm(CStr(colCount))(node)
         eZ = eZ + 1: If colCount > wtInThousands Then _
           colCount = colCount - 1 Else colCount = Ref_Item ' HotFix!
       Else
-        Gaps(eZ) = Gaps(eZ) & WordForm(CStr(Ref_Item))(aU)
+        Gaps(eZ) = Gaps(eZ) & WordForm(CStr(Ref_Item))(node)
       End If
-    Next aU
+    Next node
     
     NumberFormatterRU = LTrim(Join(Gaps, ""))
   End If: Erase Gaps
@@ -226,14 +226,16 @@ Private Function RemoveEndings(ByRef Ref_Word As String, _
     For Each regMatch In Split(regex)
       rZ = InStr(regMatch, "]") + 1 ' rZ - начало области после [list]
       On Error Resume Next
-        For region = 2 To rZ - 2
-          If rZ < 2 Then region = 1: rZ = 2 ' Если нет [list]
-          If Ref_Word Like "*" & Mid(regMatch, region, 1) & Mid(regMatch, rZ) Then
-            regMatch = Mid(regMatch, region, 1) & Mid(regMatch, rZ)
-            Ref_Word = Left(Ref_Word, Len(Ref_Word) - Len(regMatch))
-            RemoveEndings = True: Exit For
-          End If: If region = 1 Then Exit For
-        Next region: If RemoveEndings Then Exit For
+      '< <<<
+      For region = 2 To rZ - 2
+        If rZ < 2 Then region = 1: rZ = 2 ' Если нет [list]
+        If Ref_Word Like "*" & Mid(regMatch, region, 1) & Mid(regMatch, rZ) Then
+          regMatch = Mid(regMatch, region, 1) & Mid(regMatch, rZ)
+          Ref_Word = Left(Ref_Word, Len(Ref_Word) - Len(regMatch))
+          RemoveEndings = True: Exit For
+        End If: If region = 1 Then Exit For
+      Next region: If RemoveEndings Then Exit For
+      '> >>>
       On Error GoTo 0
     Next regMatch
   End If: Ref_Word = prefix & Ref_Word

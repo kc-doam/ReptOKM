@@ -7,7 +7,7 @@ Private LastRow as Long ' r317
 
 Public Sub GetBanks(ByRef Ref_ID As Collection, _
   Optional ByRef Ref_SUPP As Collection)
-  Attribute GetBanks.VB_Description = "r317 ¦ Определение структуры файла статистики"
+  Attribute GetBanks.VB_Description = "r318 ¦ Определение структуры файла статистики"
   If Not Ref_ID.Count = 0 Then Exit Sub ' HoxFix!
   Dim objNamed As Object, bank As String, field As String
   ' ВАЖНАЯ ЧАСТЬ! Заголовки найденных именованных диапазонов в коллекции
@@ -96,6 +96,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
               Case Is = "Quant_In": field = "AimAMT_gb"
               Case Is = "Goszak_In": field = "AimAMT_gz"
               Case Is = "Quant_pay": field = "AcceptAMT"
+              Case Is = "Quant_Rec": field = "AcceptAMT" ' QT ' r318
               Case Is = "Quant_Out": field = "AcceptAMT_gb"
               Case Is = "Goszak_Out": field = "AcceptAMT_gz"
             End Select
@@ -129,7 +130,7 @@ Public Sub GetBanks(ByRef Ref_ID As Collection, _
         ElseIf bank Like "PART_*" Then ' r317
           On Error Resume Next
           '< <<<
-          If Ref_ID(field).item("OT_OT") And Err.Number = 5 Then ' HotFix!
+          If Ref_ID(field).Item("OT_OT") And Err.Number = 5 Then ' HotFix!
             Ref_ID(field).Add .RefersToRange.Column, "BO_SF"
             Ref_ID(field).Add .RefersToRange.Column, "KF_SF"
           Else ' after := PRE & "OT"
@@ -275,7 +276,7 @@ Public Function GetRecord(ByRef Ref_Row As Integer, ByVal keyID As String, _
 End Function
 
 Public Function GetSheetID(ByVal sheetCodeName As String, _
-  Optional ByRef Ref_isThisBook As Boolean = True) As Byte ' ThisBook - ДА, эта книга
+  Optional ByRef Ref_isThisBook As Boolean = True) As Byte ' "ЭтаКнига" - ДА, эта книга
   Attribute GetSheetID.VB_Description = "r314 ¦ Найти индекс листа по CodeName"
   Dim objBook As Workbook, objSheet As Worksheet
   
@@ -290,15 +291,17 @@ Public Function GetSheetID(ByVal sheetCodeName As String, _
   Next objSheet: Set objSheet = Nothing: Set objBook = Nothing
 End Function
 
-Public Sub HookMsg(ByVal promt As Variant, ByVal style As VbMsgBoxStyle, _
+Public Sub HookMsg(ByVal promt As Variant, ByVal style As vbMsgBoxStyle, _
   Optional ByVal title As String)
   Attribute HookMsg.VB_Description = "r317 ¦ Вывод сообщений в окно 'Immediate' в режиме IS_DEBUG"
   Dim comma As Variant
   
   If style > vbRetryCancel And IS_DEBUG Then style = vbRetryCancel
   Select Case style
+
     Case Is = vbOKCancel
       Debug.Print promt
+    
     Case Is = vbRetryCancel
       If IS_DEBUG Then
         promt = Split(Replace(promt, vbCr, vbTab), vbTab)
@@ -306,8 +309,10 @@ Public Sub HookMsg(ByVal promt As Variant, ByVal style As VbMsgBoxStyle, _
           Debug.Print comma,: Next comma: Debug.Print ""
         If Asc(Left(title & "@", 1)) < 48 Then Stop ' isTitle
       End If
+    
     Case Else
       MsgBox promt, style, IIf(Trip(Len(title)) > 0, title, Application.Name)
+    
   End Select
 End Sub
 

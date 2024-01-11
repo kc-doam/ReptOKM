@@ -1,4 +1,12 @@
-### [2023.09.11-alpha](../../commit)
+### [2024.01.12-alpha](../../commit)
+ > * Fix *sub* `Auto_Open` **переработано** && Rename *variable* ~`item`~ to `node`
+ > * Fix *sub* `NumberFormatterRU` **переработано** && Rename *variable* ~`number`~ to `tNumber`, *variable* ~`aU`~ to `node`
+ > * Fix *sub* `GetBanks` **добавлена замена именованного диапазона `Quant_Rec`**
+ * Fix *sub* `Main_Sub` **добавлена проверка `IS_DEBUG`**
+ * Fix *sub* `DialogButtons_Click` **добавлена проверка `IS_DEBUG`**
+ * Fix *sub* `GetForm_DialogElements` **добавлена форма выбора: текущая дата**
+
+### [2023.09.11-alpha](../../commit/b7077332)
  > * Fix *style* `vbRetryCancel` in *sub* `HookMsg`
  > * Fix *sub* `GetBanks` **включена функция сортировки** `SortBySheet`
  > * Fix *sub* `Shell_Sort` **переработано**
@@ -46,6 +54,8 @@
  > * Fix *function* `DeleteModulesAndCode` **переработано**
  - Add *const* `WORKBOOKS_FILTER` **выбор определённых имён файлов, разделитель `$`**
  * Fix *function* `Taxpayer_Number_CRC` **исправлена ошибка**
+
+#
 
 ### [2020.07.7-alpha](../../commit/45fb4c25)
  > * Fix *sub* `NumeralRU` **исправлена ошибка подсчёта `secondDigit`**
